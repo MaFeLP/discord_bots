@@ -2,7 +2,7 @@ use std::env;
 
 use serenity::{
     async_trait,
-    model::{channel::Message, gateway::Ready},
+    model::{channel::Message, gateway::Ready, Permissions},
     prelude::*,
     utils::MessageBuilder,
 };
@@ -23,7 +23,19 @@ impl EventHandler for Handler {
     }
 
     async fn ready(&self, _ctx: Context, _data_about_bot: Ready) {
-        println!("Logged in as {}", _data_about_bot.user.name)
+        println!("Logged in as {}", _data_about_bot.user.name);
+
+        let permissions = Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES | Permissions::EMBED_LINKS;
+        match _data_about_bot.user.invite_url(&_ctx, permissions).await {
+            Ok(url) => {
+                println!("Bot invitation url is: {}", url);
+                return;
+            }
+            Err(why) => {
+                println!("Error getting invite url: {}", why);
+                return;
+            }
+        };
     }
 }
 
