@@ -13,13 +13,6 @@ struct Handler;
 impl EventHandler for Handler {
     async fn message(&self, _ctx: Context, mut _new_message: Message) {
         let lower_case = _new_message.content.to_lowercase();
-        if lower_case.contains("~ping") {
-            if let Err(why) = _new_message.reply(_ctx, "Pong!").await {
-                println!("Error sending message: {:?}", why)
-            };
-
-            return;
-        }
         if lower_case.contains("xd") && !_new_message.author.bot {
             if let Err(why) = _new_message.reply(_ctx, "XDDDDDDD").await {
                 println!("Error sending message: {:?}", why)
