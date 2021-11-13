@@ -1,11 +1,10 @@
 mod xd;
 mod kaenguru;
 
+use std::panic;
 use std::borrow::Borrow;
 use std::env;
-use std::ops::Add;
 use std::process::exit;
-use std::time::Duration;
 use tokio::runtime::Runtime;
 
 use serenity::{
@@ -14,7 +13,12 @@ use serenity::{
 use tokio::time::Instant;
 
 async fn start_xd() {
+    panic::set_hook(Box::new(|_| {
+        eprintln!("Fatal: Not discord token XD found!\nFatal: Please set the DISCORD_TOKEN_XD environment variable to your discord token!\nFatal: More information can be found here: https://mafelp.github.io/MCDC/installation#get-a-discord-bot-token");
+        exit(2);
+    }));
     let xd_token = env::var("DISCORD_TOKEN_XD").expect("xd_token");
+    let _ = panic::take_hook();
     let mut xd_client = Client::builder(xd_token)
         .event_handler(xd::XDHandler)
         .await
@@ -26,7 +30,12 @@ async fn start_xd() {
 }
 
 async fn start_kg() {
+    panic::set_hook(Box::new(|_| {
+        eprintln!("Fatal: Not discord token Känguru found!\nFatal:Please set the DISCORD_TOKEN_KAENGURU environment variable to your discord token!\nFatal: More information can be found here: https://mafelp.github.io/MCDC/installation#get-a-discord-bot-token");
+        exit(2);
+    }));
     let kg_token = env::var("DISCORD_TOKEN_KAENGURU").expect("kg_token");
+    let _ = panic::take_hook();
     let mut kg_client = Client::builder(kg_token)
         .event_handler(kaenguru::KaenguruHandler)
         .await
