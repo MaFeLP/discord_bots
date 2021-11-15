@@ -1,3 +1,4 @@
+use crate::xd::replies::replies;
 use serenity::{
     async_trait,
     model::{
@@ -7,7 +8,6 @@ use serenity::{
     },
     prelude::*,
 };
-use crate::xd::replies::replies;
 
 mod replies;
 
@@ -21,7 +21,11 @@ impl EventHandler for XDHandler {
         }
 
         for (key, value) in replies() {
-            if _new_message.content.to_lowercase().contains(&key.to_lowercase()) {
+            if _new_message
+                .content
+                .to_lowercase()
+                .contains(&key.to_lowercase())
+            {
                 let option_channel = _ctx.cache.channel(_new_message.channel_id).await;
                 match _new_message.reply(&_ctx, value).await {
                     Ok(msg) => {
