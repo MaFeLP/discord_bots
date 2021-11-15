@@ -1,6 +1,10 @@
 use serenity::{
     async_trait,
-    model::{channel::Message, gateway::Ready, Permissions},
+    model::{
+        channel::{Channel, Message},
+        gateway::Ready,
+        Permissions,
+    },
     prelude::*,
 };
 
@@ -14,9 +18,21 @@ impl EventHandler for XDHandler {
         }
 
         if _new_message.content.to_lowercase().contains("xd") {
-            match _new_message.reply(_ctx, "XDDDDDDD").await {
-                Ok(msg) => println!("[XD]:\tSend message \"XDDDDDDD\" to channel {}", msg.channel_id),
-                Err(why) => println!("[XD]:\tError sending message: {:?}", why)
+            let option_channel = _ctx.cache.channel(_new_message.channel_id).await;
+            match _new_message.reply(&_ctx, "XDDDDDDD").await {
+                Ok(msg) => {
+                    let channel_name = match option_channel {
+                        Some(Channel::Private(c)) => format!("DM:{}", c.recipient.name),
+                        Some(Channel::Guild(c)) => c.name,
+                        Some(c) => format!("ID:{}", c.id()),
+                        None => "Not a channel".to_string(),
+                    };
+                    println!(
+                        "[XD]:\tSend message \"{}\" to channel {} ({})",
+                        msg.content, channel_name, msg.channel_id
+                    )
+                }
+                Err(why) => println!("[XD]:\tError sending message: {:?}", why),
             };
         }
     }
@@ -24,7 +40,8 @@ impl EventHandler for XDHandler {
     async fn ready(&self, _ctx: Context, _data_about_bot: Ready) {
         println!("[XD]:\tLogged in as {}", _data_about_bot.user.name);
 
-        let permissions = Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES | Permissions::EMBED_LINKS;
+        let permissions =
+            Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES | Permissions::EMBED_LINKS;
         match _data_about_bot.user.invite_url(&_ctx, permissions).await {
             Ok(url) => {
                 println!("[XD]:\tBot invitation url is: {}", url);

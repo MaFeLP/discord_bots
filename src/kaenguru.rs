@@ -13,9 +13,9 @@ impl EventHandler for KaenguruHandler {
             return;
         }
 
-        if _new_message.content.to_lowercase().contains("€") ||
-            _new_message.content.to_lowercase().contains("eur") {
-
+        if _new_message.content.to_lowercase().contains("€")
+            || _new_message.content.to_lowercase().contains("eur")
+        {
             let mut number: u64 = 0;
             {
                 let mut tens: u64 = 1;
@@ -32,7 +32,7 @@ impl EventHandler for KaenguruHandler {
                             } else {
                                 in_euro = false;
                             }
-                            continue
+                            continue;
                         } else {
                             for n in 0..9 {
                                 if n.to_string() == c.to_string() {
@@ -47,7 +47,13 @@ impl EventHandler for KaenguruHandler {
                 }
             }
 
-            let description = format!("{} Euro? Das, das sind ja {} Mark! {} Ostmark! {} Ostmark aufm Schwarzmarkt!", number, number * 2, number *4, number *8);
+            let description = format!(
+                "{} Euro? Das, das sind ja {} Mark! {} Ostmark! {} Ostmark aufm Schwarzmarkt!",
+                number,
+                number * 2,
+                number * 4,
+                number * 8
+            );
 
             match _new_message
                 .channel_id
@@ -64,7 +70,9 @@ impl EventHandler for KaenguruHandler {
                     });
 
                     m
-                }).await {
+                })
+                .await
+            {
                 Ok(msg) => println!("[KG]:\tSending money Message to {}", msg.channel_id),
                 Err(why) => println!("[KG]:\tError sending message: {:?}", why),
             };
@@ -74,7 +82,8 @@ impl EventHandler for KaenguruHandler {
     async fn ready(&self, _ctx: Context, _data_about_bot: Ready) {
         println!("[KG]:\tLogged in as {}", _data_about_bot.user.name);
 
-        let permissions = Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES | Permissions::EMBED_LINKS;
+        let permissions =
+            Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES | Permissions::EMBED_LINKS;
         match _data_about_bot.user.invite_url(&_ctx, permissions).await {
             Ok(url) => println!("[KG]:\tBot invitation url is: {}", url),
             Err(why) => println!("[KG]:\tError getting invite url: {}", why),

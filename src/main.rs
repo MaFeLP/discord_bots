@@ -1,17 +1,15 @@
-mod xd;
 mod kaenguru;
+mod xd;
 
-use std::panic;
 use std::borrow::Borrow;
 use std::env;
+use std::panic;
 use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
 use tokio::runtime::Runtime;
 
-use serenity::{
-    prelude::*,
-};
+use serenity::prelude::*;
 use tokio::time::Instant;
 
 async fn start_xd() {
@@ -27,7 +25,10 @@ async fn start_xd() {
         .expect("[XD]:\tError creating client");
 
     if let Err(why) = xd_client.start().await {
-        println!("[KG]:\tAn error occurred while running the client: {:?}", why);
+        println!(
+            "[KG]:\tAn error occurred while running the client: {:?}",
+            why
+        );
     }
 }
 
@@ -44,7 +45,10 @@ async fn start_kg() {
         .expect("[KG]:\tError creating client");
 
     if let Err(why) = kg_client.start().await {
-        println!("[KG]:\tAn error occurred while running the client: {:?}", why);
+        println!(
+            "[KG]:\tAn error occurred while running the client: {:?}",
+            why
+        );
     }
 }
 
@@ -53,9 +57,9 @@ fn main() {
     let start = Instant::now();
     let rt = Runtime::new().unwrap();
     rt.block_on(async move {
-        tokio::spawn(async { start_xd().await});
+        tokio::spawn(async { start_xd().await });
         println!("[ASYN]:\tStarted \"XD-Bot\"!");
-        tokio::spawn(async { start_kg().await});
+        tokio::spawn(async { start_kg().await });
         println!("[ASYN]:\tStarted \"Känguru Rechenknecht\"!");
     });
     println!("[MAIN]:\tStarted two bots.\n[MAIN]:\tThey should appear in you list shortly!");
@@ -82,7 +86,8 @@ fn main() {
         }
         println!("[MAIN]: Ran for {}:{}:{}", s_hours, s_minutes, s_seconds);
         exit(0);
-    }).expect("Error setting Ctrl-C handler");
+    })
+    .expect("Error setting Ctrl-C handler");
     loop {
         sleep(Duration::from_secs(1))
     }
