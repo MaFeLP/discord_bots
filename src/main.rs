@@ -5,6 +5,8 @@ use std::panic;
 use std::borrow::Borrow;
 use std::env;
 use std::process::exit;
+use std::thread::sleep;
+use std::time::Duration;
 use tokio::runtime::Runtime;
 
 use serenity::{
@@ -31,7 +33,7 @@ async fn start_xd() {
 
 async fn start_kg() {
     panic::set_hook(Box::new(|_| {
-        eprintln!("Fatal: Not discord token Känguru found!\nFatal:Please set the DISCORD_TOKEN_KAENGURU environment variable to your discord token!\nFatal: More information can be found here: https://mafelp.github.io/MCDC/installation#get-a-discord-bot-token");
+        eprintln!("Fatal: Not discord token Känguru found!\nFatal: Please set the DISCORD_TOKEN_KAENGURU environment variable to your discord token!\nFatal: More information can be found here: https://mafelp.github.io/MCDC/installation#get-a-discord-bot-token");
         exit(2);
     }));
     let kg_token = env::var("DISCORD_TOKEN_KAENGURU").expect("kg_token");
@@ -81,5 +83,7 @@ fn main() {
         println!("[MAIN]: Ran for {}:{}:{}", s_hours, s_minutes, s_seconds);
         exit(0);
     }).expect("Error setting Ctrl-C handler");
-    loop {}
+    loop {
+        sleep(Duration::from_secs(1))
+    }
 }
