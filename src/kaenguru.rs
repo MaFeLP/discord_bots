@@ -68,7 +68,7 @@ impl EventHandler for KaenguruHandler {
                             }
                             continue;
                         } else {
-                            for n in 0..9 {
+                            for n in 0..10 {
                                 if n.to_string() == c.to_string() {
                                     number += n * tens;
                                     tens *= 10;
