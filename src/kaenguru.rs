@@ -3,6 +3,7 @@ use serenity::{
     model::{channel::Message, gateway::Ready, Permissions},
     prelude::*,
 };
+use serenity::utils::Color;
 
 enum Euro {
     E,
@@ -23,12 +24,18 @@ impl EventHandler for KaenguruHandler {
             || _new_message.content.to_lowercase().contains("eur")
         {
             let mut number: u64 = 0;
+            let mut over_100_000: bool = false;
             {
                 let mut tens: u64 = 1;
                 let mut in_euro = false;
                 let mut first_space = true;
                 let mut euro = Euro::R;
                 for c in _new_message.content.to_lowercase().chars().rev() {
+                    // To avoid buffer overflows, exit at over 100.000
+                    if number > 100_000 {
+                        over_100_000 = true;
+                        break;
+                    }
                     // Checks if EUR was written and then searches for a number
                     {
                         if c == 'r' {
@@ -85,13 +92,29 @@ impl EventHandler for KaenguruHandler {
                 println!("[KG]:\tMessage did not contain a number to convert to EUROs. Returning.");
                 return;
             }
-            let description = format!(
-                "{} Euro? Das, das sind ja {} Mark! {} Ostmark! {} Ostmark aufm Schwarzmarkt!",
-                number,
-                number * 2,
-                number * 4,
-                number * 8
-            );
+            let description = match over_100_000 {
+                true => format!(
+                    "Huiuiui! So viele Schulden kann die DDR doch nicht haben!"
+                ),
+                false => {
+                    match number < 10 {
+                        true => format!(
+                            "{} Euro? Das, das sind ja {} Mark! {} Ostmark! {} Ostmark aufm Schwarzmarkt!\n\nKleinvieh macht auch Mist!",
+                            number,
+                            number * 2,
+                            number * 4,
+                            number * 8
+                        ),
+                        false => format!(
+                            "{} Euro? Das, das sind ja {} Mark! {} Ostmark! {} Ostmark aufm Schwarzmarkt!",
+                            number,
+                            number * 2,
+                            number * 4,
+                            number * 8
+                        ),
+                    }
+                }
+            };
 
             match _new_message
                 .channel_id
@@ -103,6 +126,9 @@ impl EventHandler for KaenguruHandler {
                             f.text("War ich ein guter Rechenknecht?");
                             f
                         });
+                        if over_100_000 {
+                            e.color(Color::from_rgb(255, 0, 0));
+                        }
 
                         e
                     });
