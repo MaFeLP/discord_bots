@@ -48,9 +48,7 @@ impl EventHandler for KaenguruHandler {
                         if c == 'u' {
                             euro = match euro {
                                 Euro::U => Euro::E,
-                                _ => Euro::R                    // Because we use german metrics, and don't want to have to deal with floats,
-                    // The decimal point is reset.
-,
+                                _ => Euro::R,
                             };
                             continue;
                         }
@@ -69,21 +67,24 @@ impl EventHandler for KaenguruHandler {
                         in_euro = true;
                         continue;
                     }
+                    if ! in_euro {
+                        continue;
+                    }
                     // Accepts one space between EUR/€ and the number
                     if c == ' ' {
                         if first_space {
                             first_space = false;
+                            continue;
                         } else {
-                            in_euro = false;
+                            break;
                         }
-                        continue;
                     // Accepts , as decimal separator
                     // Because we use german metrics, and don't want to have to deal with floats,
                     // The decimal point is reset.
                     } else if c == ',' {
                         tens = 1;
                         number = 0;
-                    // Accepts . as thousands separator
+                    // Accepts . as (thousands) separator
                     } else if c == '.' {
                         continue;
                     } else {
