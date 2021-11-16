@@ -132,6 +132,14 @@ impl EventHandler for KaenguruHandler {
 
                         e
                     });
+                    // References the original message
+                    m.reference_message(&_new_message);
+                    m.allowed_mentions(|f| {
+                        // Need to set this to false, because it would otherwise change the message
+                        // background yellow (for the user who wrote it).
+                        f.replied_user(false);
+                        f
+                    });
 
                     m
                 })
