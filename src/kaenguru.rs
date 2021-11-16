@@ -4,6 +4,12 @@ use serenity::{
     prelude::*,
 };
 
+enum Euro {
+    E,
+    U,
+    R,
+}
+
 pub struct KaenguruHandler;
 
 #[async_trait]
@@ -21,7 +27,35 @@ impl EventHandler for KaenguruHandler {
                 let mut tens: u64 = 1;
                 let mut in_euro = false;
                 let mut first_space = true;
+                let mut euro = Euro::R;
                 for c in _new_message.content.to_lowercase().chars().rev() {
+                    // Checks if EUR was written and then searches for a number
+                    {
+                        if c == 'r' {
+                            euro = match euro {
+                                Euro::R => Euro::U,
+                                _ => Euro::R,
+                            };
+                            continue;
+                        }
+                        if c == 'u' {
+                            euro = match euro {
+                                Euro::U => Euro::E,
+                                _ => Euro::R,
+                            };
+                            continue;
+                        }
+                        if c == 'e' {
+                            euro = match euro {
+                                Euro::E => {
+                                    in_euro = true;
+                                    Euro::R
+                                },
+                                _ => Euro::R,
+                            };
+                            continue;
+                        }
+                    }
                     if c == '€' {
                         in_euro = true;
                     }
@@ -47,6 +81,10 @@ impl EventHandler for KaenguruHandler {
                 }
             }
 
+            if number == 0 {
+                println!("[KG]:\tMessage did not contain a number to convert to EUROs. Returning.");
+                return;
+            }
             let description = format!(
                 "{} Euro? Das, das sind ja {} Mark! {} Ostmark! {} Ostmark aufm Schwarzmarkt!",
                 number,
