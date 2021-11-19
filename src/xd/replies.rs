@@ -31,11 +31,15 @@ pub fn replies() -> HashMap<String, String> {
     );
     out.insert(
         "Arch".to_string(),
-        "> linux\n\nIch benutze Bogen bei dem Weg".to_string(),
+        "> Arch\n\nIch benutze Bogen bei dem Weg".to_string(),
     );
     out.insert(
         "Bogen".to_string(),
-        "> linux\n\nIch benutze Bogen bei dem Weg".to_string(),
+        "> Bogen\n\nIch benutze Bogen bei dem Weg".to_string(),
+    );
+    out.insert(
+        "cringe".to_string(),
+        "> cringe\n\nDas Jugendwort des Jahres ist cringe. Aber was ist das eigentlich?\nCringe ist das Gefühl, dass sie haben, wenn ich den folgenden Satz sage:\n> Digga, wie fly ist eigentlich die Tagesschau, wenn sie mit Jugendwörtern flext.\n> Läuft bei dir ARD.".to_string(),
     );
 
     out
