@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  xdbot:
+    container_name: xd_bot
+    image: archlinux
+    volumes:
+      - "./target/release/:/app/"
+    command:
+      - "/app/xd_bot"
+    env_file:
+      - "./.env"
