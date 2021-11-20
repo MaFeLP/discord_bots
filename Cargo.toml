@@ -17,6 +17,8 @@ exclude = [".env"]
 [dependencies]
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 ctrlc = "3.2"
+regex = "1.5"
+lazy_static = "1.4.0"
 
 [dependencies.serenity]
 default-features = false
