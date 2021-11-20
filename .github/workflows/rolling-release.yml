@@ -17,7 +17,14 @@ jobs:
     runs-on: "ubuntu-latest"
 
     steps:
+      - name: Make Repository name lowercase
+        id: name
+        uses: ASzc/change-string-case-action@v2
+        with:
+          string: ${{ env.IMAGE_NAME }}
+
       - uses: actions/checkout@v2
+
       - name: Setup cross compilation
         run: cargo install cross
           
@@ -74,7 +81,7 @@ jobs:
             binary_name=aarch64-linux-discord_bots
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ lowercase(env.IMAGE_NAME) }}:rolling
+            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:rolling
           labels: ${{ steps.meta.outputs.labels }}
 
       # Build linux/amd64 image
@@ -88,5 +95,5 @@ jobs:
             binary_name=amd64-linux-discord_bots
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ lowercase(env.IMAGE_NAME) }}:rolling
+            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:rolling
           labels: ${{ steps.meta.outputs.labels }}
