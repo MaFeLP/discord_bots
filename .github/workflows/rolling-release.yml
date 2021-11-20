@@ -73,7 +73,7 @@ jobs:
             binary_name=aarch64-linux-discord_bots
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            type=raw,value=rolling
+            rolling
           labels: ${{ steps.meta.outputs.labels }}
 
       # Build linux/amd64 image
