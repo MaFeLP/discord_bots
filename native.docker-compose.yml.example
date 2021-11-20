@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  xd_bot:
+    container_name: xd_bot
+    image: debian:buster-slim
+    working_dir: /app
+    volumes:
+      - "./target/release/:/app/"
+    command:
+      - "/app/xd_bot"
+    env_file:
+      - "./.env"
