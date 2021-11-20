@@ -22,65 +22,67 @@ impl EventHandler for KaenguruHandler {
         {
             let number = get_euro(&_new_message.content.to_lowercase());
 
-            if number == 0 {
-                println!("[KG]:\tMessage did not contain a number to convert to EUROs. Returning.");
-                return;
-            }
-            let description = match number > 100_000 {
-                true => format!(
-                    "Huiuiui! So viele Schulden kann die DDR doch nicht haben!"
-                ),
-                false => {
-                    match number < 10 {
-                        true => format!(
-                            "{} Euro? Das, das sind ja {} Mark! {} Ostmark! {} Ostmark aufm Schwarzmarkt!\n\nKleinvieh macht auch Mist!",
-                            number,
-                            number * 2,
-                            number * 4,
-                            number * 8
-                        ),
-                        false => format!(
-                            "{} Euro? Das, das sind ja {} Mark! {} Ostmark! {} Ostmark aufm Schwarzmarkt!",
-                            number,
-                            number * 2,
-                            number * 4,
-                            number * 8
-                        ),
-                    }
+            if let Ok(number) = number {
+                if number == 0 {
+                    println!("[KG]:\tMessage did not contain a number to convert to EUROs. Returning.");
+                    return;
                 }
-            };
+                let description = match number > 100_000 {
+                    true => format!(
+                        "Huiuiui! So viele Schulden kann die DDR doch nicht haben!"
+                    ),
+                    false => {
+                        match number < 10 {
+                            true => format!(
+                                "{} Euro? Das, das sind ja {} Mark! {} Ostmark! {} Ostmark aufm Schwarzmarkt!\n\nKleinvieh macht auch Mist!",
+                                number,
+                                number * 2,
+                                number * 4,
+                                number * 8
+                            ),
+                            false => format!(
+                                "{} Euro? Das, das sind ja {} Mark! {} Ostmark! {} Ostmark aufm Schwarzmarkt!",
+                                number,
+                                number * 2,
+                                number * 4,
+                                number * 8
+                            ),
+                        }
+                    }
+                };
 
-            match _new_message
-                .channel_id
-                .send_message(&_ctx.http, |m| {
-                    m.embed(|e| {
-                        //e.author();
-                        e.description(&description);
-                        e.footer(|f| {
-                            f.text("War ich ein guter Rechenknecht?");
+                match _new_message
+                    .channel_id
+                    .send_message(&_ctx.http, |m| {
+                        m.embed(|e| {
+                            //e.author();
+                            e.description(&description);
+                            e.footer(|f| {
+                                f.text("War ich ein guter Rechenknecht?");
+                                f
+                            });
+                            if number > 100_000 {
+                                e.color(Color::from_rgb(255, 0, 0));
+                            }
+
+                            e
+                        });
+                        // References the original message
+                        m.reference_message(&_new_message);
+                        m.allowed_mentions(|f| {
+                            // Need to set this to false, because it would otherwise change the message
+                            // background yellow (for the user who wrote it).
+                            f.replied_user(false);
                             f
                         });
-                        if number > 100_000 {
-                            e.color(Color::from_rgb(255, 0, 0));
-                        }
 
-                        e
-                    });
-                    // References the original message
-                    m.reference_message(&_new_message);
-                    m.allowed_mentions(|f| {
-                        // Need to set this to false, because it would otherwise change the message
-                        // background yellow (for the user who wrote it).
-                        f.replied_user(false);
-                        f
-                    });
-
-                    m
-                })
-                .await
-            {
-                Ok(msg) => println!("[KG]:\tSending money Message to {}", msg.channel_id),
-                Err(why) => println!("[KG]:\tError sending message: {:?}", why),
+                        m
+                    })
+                    .await
+                {
+                    Ok(msg) => println!("[KG]:\tSending money Message to {}", msg.channel_id),
+                    Err(why) => println!("[KG]:\tError sending message: {:?}", why),
+                };
             };
         }
     }
