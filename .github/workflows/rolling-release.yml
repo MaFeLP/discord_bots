@@ -1,4 +1,4 @@
-name: "pre-release"
+name: "Rolling Release"
 
 on:
   push:
@@ -39,7 +39,9 @@ jobs:
           title: "Development Build"
           files: |
             LICENSE
-            /tmp/release-files/*
+            aarch64-linux-discord_bots
+            win64-discord_bots.exe
+            amd64-linux-discord_bots
 
 # When the release has been created: create docker images in the same step to save computing time
       - name: Log into registry ${{ env.REGISTRY }}
@@ -84,5 +86,5 @@ jobs:
             binary_name=amd64-linux-discord_bots
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            type=raw,value=rolling
+            rolling
           labels: ${{ steps.meta.outputs.labels }}
