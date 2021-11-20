@@ -1,0 +1,40 @@
+name: "pre-release"
+
+on:
+  push:
+    branches:
+      - "main"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  pre-release:
+    name: "Pre Release"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup cross compilation
+        run: cargo install cross
+          
+      - name: Build cross platform
+        run: |
+          mkdir /tmp/release-files
+          ~/.cargo/bin/cross build --release --target aarch64-unknown-linux-gnu
+          mv target/aarch64-unknown-linux-gnu/release/xd_bot /tmp/release-files/aarch64-linux-discord_bots
+          ~/.cargo/bin/cross build --release --target x86_64-pc-windows-gnu
+          mv target/x86_64-pc-windows-gnu/release/xd_bot.exe /tmp/release-files/win64-discord_bots.exe
+          ~/.cargo/bin/cross build --release --target x86_64-unknown-linux-gnu
+          mv target/x86_64-unknown-linux-gnu/release/xd_bot /tmp/release-files/amd64-linux-discord_bots
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            LICENSE
+            /tmp/release-files/*
+
