@@ -1,1 +1,10 @@
 target/
+.git/
+.github/
+assets/
+.idea/
+.gitignore
+.gitattributes
+docker-compose.yml.example
+native.docker-compose.yml.example
+README.md
