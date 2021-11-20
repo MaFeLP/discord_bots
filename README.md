@@ -26,7 +26,7 @@ Then you can choose of a few solution:
    2. Edit `.env` and enter behind the equals sign your [bot tokens](#bot-tokens) for your two bots
 5. Run the docker image:
 
-```bash
+```shell
 docker run -it --rm \
     --name xdbot \
     --env-file .env \
@@ -51,19 +51,19 @@ and then just running the binary inside a container.
    but if you have to change something, you can do so here.**
 4. Run the following command to start the docker container
 
-```bash
+```shell
 DOCKER_BUILDKIT=1 docker-compose up
 ```
 
 If you want to have your container running in the background, run:
 
-```bash
+```shell
 DOCKER_BUILDKIT=1 docker-compose up -d
 ```
 
 To stop the container, simply run the following command:
 
-```bash
+```shell
 docker-compose down
 ```
 
@@ -96,19 +96,19 @@ docker-compose down
       system, change this to `PATH/TO/THE/BINARY:/app/xd_bot`.
 5. Run the following command to start the docker container
 
-```bash
+```shell
 docker-compose up
 ```
 
 If you want to have your container running in the background, run:
 
-```bash
+```shell
 docker-compose up -d
 ```
 
 To stop the container, simply run the following command:
 
-```bash
+```shell
 docker-compose down
 ```
 
@@ -121,7 +121,7 @@ docker-compose down
 
 On Linux and MacOS:
 
-```bash
+```shell
 DISCORD_TOKEN_KAENGURU="YOUR KAENGURU BOT TOKEN" \
 DISCORD_TOKE_XD="YOUR XD BOT TOKEN" \
 ./target/xd_bot
