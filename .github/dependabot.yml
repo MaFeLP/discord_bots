@@ -1,0 +1,26 @@
+version: 1
+updates:
+
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: daily
+    assignees:
+      - "MaFeLP"
+    assignees:
+      - "MaFeLP"
+    reviewers: &assignees
+    commit-message:
+      prefix: "Cargo"
+      include: "scope"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "MaFeLP"
+    reviewers: &assignees
+    commit-message:
+      prefix: "GitHub Actions"
+      include: "scope"
