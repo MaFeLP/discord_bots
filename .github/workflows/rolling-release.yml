@@ -2,11 +2,14 @@ name: "pre-release"
 
 on:
   push:
-    branches:
-      - "main"
+    branches: [ "main" ]
 
 env:
   CARGO_TERM_COLOR: always
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   pre-release:
@@ -22,11 +25,11 @@ jobs:
         run: |
           mkdir /tmp/release-files
           ~/.cargo/bin/cross build --release --target aarch64-unknown-linux-gnu
-          mv target/aarch64-unknown-linux-gnu/release/xd_bot /tmp/release-files/aarch64-linux-discord_bots
+          mv target/aarch64-unknown-linux-gnu/release/xd_bot ./aarch64-linux-discord_bots
           ~/.cargo/bin/cross build --release --target x86_64-pc-windows-gnu
-          mv target/x86_64-pc-windows-gnu/release/xd_bot.exe /tmp/release-files/win64-discord_bots.exe
+          mv target/x86_64-pc-windows-gnu/release/xd_bot.exe ./win64-discord_bots.exe
           ~/.cargo/bin/cross build --release --target x86_64-unknown-linux-gnu
-          mv target/x86_64-unknown-linux-gnu/release/xd_bot /tmp/release-files/amd64-linux-discord_bots
+          mv target/x86_64-unknown-linux-gnu/release/xd_bot ./amd64-linux-discord_bots
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
@@ -38,3 +41,48 @@ jobs:
             LICENSE
             /tmp/release-files/*
 
+# When the release has been created: create docker images in the same step to save computing time
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+
+      # Build arm image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          build-args:
+            - docker_arch: "linux/arm64"
+            - binary_name: "aarch64-linux-discord_bots"
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            type=raw,value=rolling
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # Build linux/amd64 image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          build-args:
+            - docker_arch: "linux/amd64"
+            - binary_name: "amd64-linux-discord_bots"
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            type=raw,value=rolling
+          labels: ${{ steps.meta.outputs.labels }}
