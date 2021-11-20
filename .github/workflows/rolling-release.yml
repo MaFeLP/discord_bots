@@ -66,9 +66,9 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          build-args:
-            - docker_arch: "linux/arm64"
-            - binary_name: "aarch64-linux-discord_bots"
+          build-args: |
+            docker_arch=linux/arm64
+            binary_name=aarch64-linux-discord_bots
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             type=raw,value=rolling
@@ -79,9 +79,9 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          build-args:
-            - docker_arch: "linux/amd64"
-            - binary_name: "amd64-linux-discord_bots"
+          build-args: |
+            docker_arch=linux/amd64
+            binary_name=amd64-linux-discord_bots
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             type=raw,value=rolling
