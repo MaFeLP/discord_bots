@@ -1,3 +1,12 @@
+[![Build status](https://github.com/MaFeLP/discord_bots/actions/workflows/rolling-release.yml/badge.svg)](https://github.com/MaFeLP/discord_bots/actions)
+[![dependency status](https://deps.rs/repo/github/mafelp/discord_bots/status.svg)](https://deps.rs/repo/github/mafelp/discord_bots)
+[![Issues](https://img.shields.io/github/issues/mafelp/discord_bots)](https://github.com/MaFeLP/discord_bots/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/mafelp/discord_bots)](https://github.com/MaFeLP/discord_bots/pulls/)
+[![Bots](https://img.shields.io/badge/Bots-2-informational)]()
+<br>
+[![GitHub](https://img.shields.io/github/license/mafelp/discord_bots)](https://www.gnu.org/licenses/gpl-3.0.html)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/mafelp/discord_bots)](https://github.com/MaFeLP/discord_bots/releases/)
+
 # Discord Bots
 This repository holds two discord bots written in [rust](https://www.rust-lang.org/):
 
