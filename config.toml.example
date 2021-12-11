@@ -1,0 +1,39 @@
+##############################################################################
+##                          General Configuration                           ##
+##############################################################################
+# Every bot needs to have a token associated with it.
+# Environment Variables will overwrite this config file!
+[token]
+autokommentator = "YOUR SECRET TOKEN GOES HERE"
+kaenguru = "YOUR SECRET TOKEN GOES HERE"
+
+##############################################################################
+##                            Responses Section                             ##
+##############################################################################
+# Responses need to be in the following format:
+# Either the key trigger (string) or the key trigger_pool (array (string))
+# need to be defined. Same goes for response and response_pool.
+#
+# [[bot-name]]
+# trigger = "trigger regex"
+# trigger_pool = ["regex1", "regex2"]
+# response = "Response to send to the channel"
+# response_pool = ["option1", "option2"]
+
+# Responses configured for Känguru Knecht
+[[kaenguru]]
+trigger = "Schnapspraline"
+response_pool = [
+    ">Schnapspraline\n\nIch mag Schnapspralinen",
+    "Schnapspraline\n\nWenn ich nur eine Esse, merkt das keiner..."
+]
+
+# Responses configured for autokommentator
+[[autokommentator]]
+trigger = "xd"
+response = "XDDDDD"
+
+[[autokommentator]]
+trigger_pool = ["lul","lel"]
+response = "lul"
+
