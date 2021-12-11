@@ -3,6 +3,7 @@ extern crate lazy_static;
 
 mod kaenguru;
 mod xd;
+mod config;
 
 use std::borrow::Borrow;
 use std::env;
@@ -14,6 +15,7 @@ use tokio::runtime::Runtime;
 
 use serenity::prelude::*;
 use tokio::time::Instant;
+use crate::config::Config;
 
 async fn start_xd() {
     panic::set_hook(Box::new(|_| {
