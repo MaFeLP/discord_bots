@@ -7,9 +7,8 @@ updates:
       interval: daily
     assignees:
       - "MaFeLP"
-    assignees: &member
+    reviewers:
       - "MaFeLP"
-    reviewers: *member
     commit-message:
       prefix: "Cargo"
       include: "scope"
@@ -18,8 +17,10 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    assignees: *member
-    reviewers: *member
+    assignees:
+      - "MaFeLP"
+    reviewers:
+      - "MaFeLP"
     commit-message:
       prefix: "GitHub Actions"
       include: "scope"
