@@ -1,5 +1,8 @@
 use std::collections::HashMap;
 
+/// Function to get a map of all the messages to reply to as a String-String Hash Map
+///
+/// Will be removed soon and replaced with a config file to allow for changes to the replies without a rebuild!
 pub fn replies() -> HashMap<String, String> {
     let mut out: HashMap<String, String> = HashMap::new();
 
