@@ -8,17 +8,17 @@ pub enum Error {
     InvalidInput,
 }
 
-/// The regular expression used to parse the message into correctly formatted euro amounts
-///
-/// # Examples
-///
-/// * 99,10 € -> 99
-/// * 98923 € -> 98923
-/// * 91.897 € -> 91897
-/// * 99,10 EUR -> 99
-/// * 98923 EUR -> 98923
-/// * 91.897 EUR -> 91897
 lazy_static! {
+    /// The regular expression used to parse the message into correctly formatted euro amounts
+    ///
+    /// # Examples
+    ///
+    /// * 99,10 € -> 99
+    /// * 98923 € -> 98923
+    /// * 91.897 € -> 91897
+    /// * 99,10 EUR -> 99
+    /// * 98923 EUR -> 98923
+    /// * 91.897 EUR -> 91897
     static ref PARSING: Regex = Regex::new(r"(?is)(?:\d\.?)*\d(?:,\d+)? ?(?:EUR|€)").unwrap();
 }
 
