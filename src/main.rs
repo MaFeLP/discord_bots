@@ -15,7 +15,8 @@ use tokio::runtime::Runtime;
 use serenity::prelude::*;
 use tokio::time::Instant;
 
-async fn start_xd() {
+/// Function to start a new instance of the autokommentator bot
+async fn start_xd() -> void {
     panic::set_hook(Box::new(|_| {
         eprintln!("Fatal: Not discord token XD found!\nFatal: Please set the DISCORD_TOKEN_XD environment variable to your discord token!\nFatal: More information can be found here: https://mafelp.github.io/MCDC/installation#get-a-discord-bot-token");
         exit(2);
@@ -31,11 +32,12 @@ async fn start_xd() {
         println!(
             "[KG]:\tAn error occurred while running the client: {:?}",
             why
-        );
+        )
     }
 }
 
-async fn start_kg() {
+/// Function to start a new instance of the kaenguru bot
+async fn start_kg() -> void{
     panic::set_hook(Box::new(|_| {
         eprintln!("Fatal: Not discord token Känguru found!\nFatal: Please set the DISCORD_TOKEN_KAENGURU environment variable to your discord token!\nFatal: More information can be found here: https://mafelp.github.io/MCDC/installation#get-a-discord-bot-token");
         exit(2);
@@ -51,12 +53,14 @@ async fn start_kg() {
         println!(
             "[KG]:\tAn error occurred while running the client: {:?}",
             why
-        );
+        )
     }
 }
 
+/// Main entry point to this program
 fn main() {
     println!("[MAIN]:\tStarting \"Känguru Rechenkencht\" and \"XD-Bot\"...");
+    // Use tokio to run multiple bots at the same time
     let start = Instant::now();
     let rt = Runtime::new().unwrap();
     rt.block_on(async move {
@@ -66,8 +70,12 @@ fn main() {
         println!("[ASYN]:\tStarted \"Känguru Rechenknecht\"!");
     });
     println!("[MAIN]:\tStarted two bots.\n[MAIN]:\tThey should appear in you list shortly!");
+
+    // Set what happens when Ctrl+C or SIGINT is sent to this progess
     ctrlc::set_handler(move || {
         println!("\n[MAIN]: Received Shutdown Signal.");
+
+        // Calculate how long this program ran.
         let elapsed_seconds = &start.elapsed().as_secs();
         let hours = elapsed_seconds / 360;
         let mut s_hours = hours.to_string();
@@ -91,7 +99,12 @@ fn main() {
         exit(0);
     })
     .expect("Error setting Ctrl-C handler");
+
+    // loop infinitely until process is forced to exit
+    // We need to loop here, because the program would otherwise exit and disconnect all bots
     loop {
+        // Sleep for a short amount of time to lower CPU usage
+        // If we would not sleep, one CPU core would be at 100% usage
         sleep(Duration::from_secs(1))
     }
 }
