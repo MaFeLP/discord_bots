@@ -2,41 +2,37 @@ use std::{
     fs,
     env,
     path::Path,
+    sync::{Arc, Mutex},
 };
 use serde::Deserialize;
 use toml::value;
 
-lazy_static!(
-    static ref CONFIG: Config = Config::new();
-);
+lazy_static! {
+    pub static ref CONFIG: Arc<Mutex<Config>> = Arc::new(Mutex::new(Config::new()));
+}
 
 #[derive(Deserialize)]
 pub struct Config {
-    autokommentator: Autokommentator,
-    kaenguru: Kaenguru,
+    pub autokommentator: Autokommentator,
+    pub kaenguru: Kaenguru,
 }
 
 #[derive(Deserialize)]
 pub struct Kaenguru {
-    token: Option<String>,
-    replies: Vec<Response>
+    pub token: Option<String>,
+    pub replies: Vec<Response>
 }
 
 #[derive(Deserialize)]
 pub struct Autokommentator {
-    token: Option<String>,
-    replies: Vec<Response>
+    pub token: Option<String>,
+    pub replies: Vec<Response>
 }
 
 #[derive(Deserialize)]
 pub struct Response {
-    trigger: Option<value::Array>,
-    response: Option<value::Array>,
-}
-
-#[derive(Deserialize)]
-pub struct Token {
-    kaenguru: Option<String>,
+    pub trigger: Option<value::Array>,
+    pub response: Option<value::Array>,
 }
 
 impl Config {
@@ -44,7 +40,7 @@ impl Config {
         // Read in config file location
         let config_file = match env::var("CONFIG_FILE") {
             Ok(o) => o,
-            Err(a) => "config.toml".to_string()
+            Err(_) => "config.toml".to_string()
         };
 
         if ! Path::new(&config_file).exists() {
@@ -52,7 +48,7 @@ impl Config {
         }
 
         let config_content = match fs::read_to_string(&config_file) {
-            Err(why) => panic!("Could not load configuration file contents!"),
+            Err(_) => panic!("Could not load configuration file contents!"),
             Ok(s) => s
         };
 
@@ -60,4 +56,3 @@ impl Config {
         out
     }
 }
-
