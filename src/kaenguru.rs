@@ -6,7 +6,6 @@ use serenity::{
     prelude::*,
 };
 use serenity::utils::Color;
-use crate::kaenguru;
 use crate::kaenguru::euro_to_mark::get_euro;
 
 /// The default struct on which the bot is built
