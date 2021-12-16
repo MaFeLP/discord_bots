@@ -3,7 +3,7 @@ use std::{
     env,
     path::Path,
 };
-use serde::{Serialize, Deserialize};
+use serde::Deserialize;
 use toml::value;
 
 lazy_static!(
@@ -12,22 +12,30 @@ lazy_static!(
 
 #[derive(Deserialize)]
 pub struct Config {
-    token: Token,
-    kaenguru: Vec<Response>,
-    autokommentator: Vec<Response>,
+    autokommentator: Autokommentator,
+    kaenguru: Kaenguru,
+}
+
+#[derive(Deserialize)]
+pub struct Kaenguru {
+    token: Option<String>,
+    replies: Vec<Response>
+}
+
+#[derive(Deserialize)]
+pub struct Autokommentator {
+    token: Option<String>,
+    replies: Vec<Response>
 }
 
 #[derive(Deserialize)]
 pub struct Response {
-    trigger: Option<String>,
-    trigger_pool: Option<value::Array>,
-    response: Option<String>,
-    response_pool: Option<value::Array>,
+    trigger: Option<value::Array>,
+    response: Option<value::Array>,
 }
 
 #[derive(Deserialize)]
 pub struct Token {
-    autokommentator: Option<String>,
     kaenguru: Option<String>,
 }
 

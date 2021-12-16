@@ -1,39 +1,57 @@
 ##############################################################################
 ##                          General Configuration                           ##
 ##############################################################################
-# Every bot needs to have a token associated with it.
-# Environment Variables will overwrite this config file!
-[token]
-autokommentator = "YOUR SECRET TOKEN GOES HERE"
-kaenguru = "YOUR SECRET TOKEN GOES HERE"
-
-##############################################################################
-##                            Responses Section                             ##
-##############################################################################
-# Responses need to be in the following format:
-# Either the key trigger (string) or the key trigger_pool (array (string))
-# need to be defined. Same goes for response and response_pool.
+# Every bot has its own configuration section, initialized by [bot-name].
+# Every bot needs to have the token field set to a string and a list of replies
+# The reply list has to follow these guidelines:
+# replies = [
+#     # Add a new trigger
+#     {
+#         # The list of triggers that the bot should react to
+#         # This list can also only hold one item.
+#         trigger = ["trigger 1", "trigger 2"],
+#         # The pool out of which one response is randomly chosen.
+#         # This list can also only hold one item.
+#         response = ["response 1", "response 2"]
+#     }
+# ]
 #
-# [[bot-name]]
-# trigger = "trigger regex"
-# trigger_pool = ["regex1", "regex2"]
-# response = "Response to send to the channel"
-# response_pool = ["option1", "option2"]
+# Alternatively you can write the replies in the following style:
+# Here you have to add a new entry beginning with [[bot-name.replies]]
+# for every replies entry you want to create
+# [[bot-name.replies]]
+# trigger = [
+#     "trigger 1",
+#     "trigger 2"
+# ]
+# response = [
+#     "response 1",
+#     "response 2"
+# ]
 
-# Responses configured for Känguru Knecht
-[[kaenguru]]
-trigger = "Schnapspraline"
-response_pool = [
+##############################################################################
+##                          Example Configuration                           ##
+##############################################################################
+[kaenguru]
+token = "YOUR SECRET TOKEN GOES HERE"
+
+[[kaenguru.replies]]
+trigger = ["schnapspraline"]
+response = [
     ">Schnapspraline\n\nIch mag Schnapspralinen",
     "Schnapspraline\n\nWenn ich nur eine Esse, merkt das keiner..."
 ]
 
-# Responses configured for autokommentator
-[[autokommentator]]
-trigger = "xd"
-response = "XDDDDD"
+[[kaenguru.replies]]
+trigger = [
+    "boxen",
+    "box club"
+]
+response = ["Die erste Regel des Boxclubs lautet: Ihr redet nicht über den Boxclub!"]
 
-[[autokommentator]]
-trigger_pool = ["lul","lel"]
-response = "lul"
-
+[autokommentator]
+token = "YOUR SECRET TOKEN GOES HERE"
+replies = [
+    { trigger = ["xd"], response = ["XDDDDD"] },
+    { trigger = ["lul","lel"], response = ["lul"] }
+]
