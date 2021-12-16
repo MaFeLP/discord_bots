@@ -16,7 +16,7 @@ use serenity::prelude::*;
 use tokio::time::Instant;
 
 /// Function to start a new instance of the autokommentator bot
-async fn start_xd() -> void {
+async fn start_xd() {
     panic::set_hook(Box::new(|_| {
         eprintln!("Fatal: Not discord token XD found!\nFatal: Please set the DISCORD_TOKEN_XD environment variable to your discord token!\nFatal: More information can be found here: https://mafelp.github.io/MCDC/installation#get-a-discord-bot-token");
         exit(2);
@@ -37,7 +37,7 @@ async fn start_xd() -> void {
 }
 
 /// Function to start a new instance of the kaenguru bot
-async fn start_kg() -> void{
+async fn start_kg() {
     panic::set_hook(Box::new(|_| {
         eprintln!("Fatal: Not discord token Känguru found!\nFatal: Please set the DISCORD_TOKEN_KAENGURU environment variable to your discord token!\nFatal: More information can be found here: https://mafelp.github.io/MCDC/installation#get-a-discord-bot-token");
         exit(2);
