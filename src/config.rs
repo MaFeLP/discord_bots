@@ -31,8 +31,17 @@ pub struct Autokommentator {
 
 #[derive(Deserialize)]
 pub struct Response {
-    pub trigger: Option<value::Array>,
-    pub response: Option<value::Array>,
+    pub trigger: value::Array,
+    pub response: value::Array,
+}
+
+impl Clone for Response {
+    fn clone(&self) -> Self {
+        Response {
+            trigger: self.trigger.to_vec(),
+            response: self.response.to_vec()
+        }
+    }
 }
 
 impl Config {
