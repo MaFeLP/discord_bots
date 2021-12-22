@@ -21,6 +21,7 @@ regex = "1.5"
 lazy_static = "1.4"
 toml = "0.5"
 serde = { version = "1.0", features = ["derive"] }
+rand = "0.8.1"
 
 [dependencies.serenity]
 default-features = false
