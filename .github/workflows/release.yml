@@ -1,8 +1,8 @@
 name: "Release"
 
 on:
-  tag:
-    name: "v*"
+  push:
+    tags: "v*"
 
 env:
   CARGO_TERM_COLOR: always
@@ -40,11 +40,11 @@ jobs:
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ""
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: ${{ github.ref }}
           prerelease: false
           draft: true
-          title: "${{ ref.event }}"
+          title: ${{ github.ref }}
           files: |
             LICENSE
             aarch64-linux-discord_bots
@@ -82,7 +82,7 @@ jobs:
             binary_name=aarch64-linux-discord_bots
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:rolling
+            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:${{ github.ref }}
           labels: ${{ steps.meta.outputs.labels }}
 
       # Build linux/amd64 image
@@ -96,5 +96,5 @@ jobs:
             binary_name=amd64-linux-discord_bots
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:rolling
+            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:${{ github.ref }}
           labels: ${{ steps.meta.outputs.labels }}
