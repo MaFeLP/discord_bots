@@ -87,6 +87,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:${{ steps.tag_name.outputs.NAME }}-arm
+            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:latest-arm
           labels: ${{ steps.meta.outputs.labels }}
 
       # Build linux/amd64 image
@@ -101,4 +102,5 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:${{ steps.tag_name.outputs.NAME }}
+            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:latest
           labels: ${{ steps.meta.outputs.labels }}
