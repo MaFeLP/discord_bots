@@ -17,7 +17,7 @@ jobs:
     runs-on: "ubuntu-latest"
 
     steps:
-      - name: Make Repository name lowercase
+      - name: Make repository name lowercase
         id: name
         uses: ASzc/change-string-case-action@v2
         with:
