@@ -8,7 +8,7 @@ use serenity::{
     prelude::*,
 };
 use crate::config::Bots;
-use crate::replies::reply_to;
+use crate::replies::{reply_to, ReplyError};
 
 /// The default struct on which the bot is built
 pub struct XDHandler;
@@ -27,7 +27,18 @@ impl EventHandler for XDHandler {
             return;
         }
 
-        reply_to(&ctx, &new_message, Bots::Autokommentator).await;
+        match reply_to(&ctx, &new_message, Bots::Autokommentator).await {
+            Ok(msg) => {
+                println!("[XD]: Reacted '{}' to message_id: {}", msg, new_message.id);
+                return;
+            },
+            Err(why) => {
+                match why {
+                    ReplyError::MutexAcquisition => eprintln!("Something went wrong acquiring the mutex!"),
+                    ReplyError::NoReplyFound => {}
+                }
+            },
+        }
     }
 
     /// Method to be called when the bot instance has been logged in.
