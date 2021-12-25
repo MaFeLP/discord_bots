@@ -20,7 +20,7 @@ impl EventHandler for KaenguruHandler {
     ///
     /// * `_ctx`: The context in which this message was sent. Contains information about the bot and its cache
     /// * `_new_message`: The message that was sent and to which this bot should react to.
-    async fn message(&self, ctx: Context, mut new_message: Message) {
+    async fn message(&self, ctx: Context, new_message: Message) {
         // Do not do anything, if the message was sent by a bot.
         if new_message.author.bot {
             return;
