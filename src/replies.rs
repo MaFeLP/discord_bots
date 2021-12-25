@@ -1,4 +1,4 @@
-use std::sync::{Arc, MutexGuard, PoisonError};
+use std::sync::Arc;
 use std::thread::sleep;
 use std::time::Duration;
 use rand::Rng;
@@ -43,7 +43,7 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
 
     // Go through all the replies and then check if to reply to this message and with what
     // Get the name in a separate scope to not copy rng into the async part of message sending
-    let response = {
+    let response_option = {
         let mut out: Option<String> = None;
 
         for reply in replies {
@@ -72,13 +72,14 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
         out
     }; // let response
 
-    if response.is_none() {
-        return Err(ReplyError::NoReplyFound);
-    }
+    let response = match response_option {
+        None => return Err(ReplyError::NoReplyFound),
+        Some(s) => s,
+    };
 
     // Get the channel and only react to private messages and server-messages
     let option_channel = ctx.cache.channel(new_message.channel_id).await;
-    match new_message.reply(&ctx, response.unwrap()).await {
+    match new_message.reply(&ctx, &response).await {
         Ok(msg) => {
             let channel_name = match option_channel {
                 Some(Channel::Private(c)) => format!("DM:{}", c.recipient.name),
@@ -109,5 +110,5 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
         },
     };
 
-    Ok(response.unwrap())
+    Ok(response)
 }
