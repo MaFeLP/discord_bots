@@ -10,11 +10,47 @@ use serenity::{
 };
 use crate::config::{Response, CONFIG, Bots};
 
+/// The Errors that might be thrown by [reply_to]
 pub enum ReplyError {
+    /// If the bot could not acquire a lock of the configuration
     MutexAcquisition,
+    /// If no reply was found in this message.
+    /// Can be ignored in most cases.
     NoReplyFound,
 }
 
+/// A function that searches _new\_message_ for replies configured in config.toml.
+/// For this it will first acquire the Mutex Lock for the configuration.
+///
+/// # Arguments
+///
+/// * `ctx`: The [context](serenity::client::context) in which the bot operates.
+/// * `new_message`: The message to filter and react to.
+/// * `bot`: The bot which configures which replies are being searched in the config file.
+///
+/// returns: Result<String, ReplyError>
+///
+/// # Examples
+///
+/// ```
+/// /// The default struct on which the bot is built
+/// pub struct Bot;
+///
+/// #[async_trait]
+/// /// The method that reacts to new messages.
+/// /// This method is called by serenity.
+/// ///
+/// /// # Arguments
+/// ///
+/// /// * `ctx`: The context in which this message was sent. Contains information about the bot and its cache
+/// /// * `new_message`: The message that was sent and to which this bot should react to.
+/// impl EventHandler for Bot {
+///     async fn message(&self, ctx: Context, mut new_message: Message) {
+///         reply_to(&ctx, &new_message, Bots::Autokommentator).await;
+///     }
+/// }
+/// ```
+///
 pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result<String, ReplyError> {
     let replies: Vec<Response> = {
         let config_arc = Arc::clone(&CONFIG);
