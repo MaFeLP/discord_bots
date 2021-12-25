@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, MutexGuard, PoisonError};
 use std::thread::sleep;
 use std::time::Duration;
 use rand::Rng;
@@ -10,7 +10,12 @@ use serenity::{
 };
 use crate::config::{Response, CONFIG, Bots};
 
-pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) {
+pub enum ReplyError {
+    MutexAcquisition,
+    NoReplyFound,
+}
+
+pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result<String, ReplyError> {
     let replies: Vec<Response> = {
         let config_arc = Arc::clone(&CONFIG);
         let mut config_lock = config_arc.lock();
@@ -29,7 +34,7 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) {
             },
             Err(_) => {
                 println!("Something went wrong internally...");
-                return
+                return Err(ReplyError::MutexAcquisition);
             }
         };
 
@@ -44,7 +49,7 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) {
         for reply in replies {
             // If out has been set, set the reply and continue.
             if out.is_some() {
-                break
+                break;
             }
 
             // Check if current key is part of the current message
@@ -68,7 +73,7 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) {
     }; // let response
 
     if response.is_none() {
-        return;
+        return Err(ReplyError::NoReplyFound);
     }
 
     // Get the channel and only react to private messages and server-messages
@@ -103,4 +108,6 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) {
             }
         },
     };
+
+    Ok(response.unwrap())
 }
