@@ -65,3 +65,8 @@ impl Config {
         out
     }
 }
+
+pub enum Bots {
+    Autokommentator,
+    KaenguruKnecht,
+}

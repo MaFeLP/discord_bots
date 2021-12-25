@@ -4,6 +4,7 @@ extern crate lazy_static;
 mod kaenguru;
 mod xd;
 mod config;
+mod replies;
 
 use std::{
     borrow::Borrow,

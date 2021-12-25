@@ -1,22 +1,14 @@
-use std::sync::Arc;
-use std::thread::sleep;
-use std::time::Duration;
-use rand::prelude::IteratorRandom;
-use crate::xd::replies::replies;
 use serenity::{
     async_trait,
     model::{
-        channel::{Channel, Message},
+        channel::Message,
         gateway::Ready,
         Permissions,
     },
     prelude::*,
 };
-use rand::Rng;
-use crate::config::{
-    CONFIG,
-    Response
-};
+use crate::config::Bots;
+use crate::replies::reply_to;
 
 /// The default struct on which the bot is built
 pub struct XDHandler;
@@ -35,71 +27,7 @@ impl EventHandler for XDHandler {
             return;
         }
 
-        let replies: Vec<Response> = {
-            let config_arc = Arc::clone(&CONFIG);
-            let mut config_lock = config_arc.lock();
-            while config_lock.is_err() {
-                dbg!("Could not acquire config lock. Waiting...");
-                sleep(Duration::from_millis(5));
-                config_lock = config_arc.lock();
-            }
-            let reply_vector: Vec<Response> = match config_lock {
-                Ok(config) => {
-                    // Copy replies vector
-                    config.autokommentator.replies.to_vec()
-                },
-                Err(_) => {
-                    println!("Something went wrong internally...");
-                    return
-                }
-            };
-
-            reply_vector
-        };
-
-        // Go through all the replies and then check if to reply to this message and with what
-        // Get the name in a separate scope to not copy rng into the async part of message sending
-        let response = {
-            let mut out = String::from("");
-
-            for reply in replies {
-                // Check if current key is part of the current message
-                for trigger in &reply.trigger {
-                    if _new_message
-                        .content
-                        .to_lowercase()
-                        .contains(&trigger.as_str().unwrap().to_lowercase())
-                    {
-                        // Select random answer from pool
-                        let mut rng = rand::thread_rng();
-                        let response_idx = rng.gen_range(0..reply.response.len());
-                        let response_value: &toml::Value = reply.response.get(response_idx).unwrap();
-                        out = String::from(response_value.as_str().unwrap());
-
-                        return;
-                    }
-                }
-            }
-            out
-        };
-
-        // Get the channel and only react to private messages and server-messages
-        let option_channel = _ctx.cache.channel(_new_message.channel_id).await;
-        match _new_message.reply(&_ctx, response).await {
-            Ok(msg) => {
-                let channel_name = match option_channel {
-                    Some(Channel::Private(c)) => format!("DM:{}", c.recipient.name),
-                    Some(Channel::Guild(c)) => c.name,
-                    Some(c) => format!("ID:{}", c.id()),
-                    None => "Not a channel".to_string(),
-                };
-                println!(
-                    "[XD]:\tSend message \"{}\" to channel {} ({})",
-                    msg.content, channel_name, msg.channel_id
-                )
-            }
-            Err(why) => println!("[XD]:\tError sending message: {:?}", why),
-        };
+        reply_to(&_ctx, &_new_message, Bots::Autokommentator).await;
     }
 
     /// Method to be called when the bot instance has been logged in.
