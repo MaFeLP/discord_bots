@@ -22,12 +22,12 @@ impl EventHandler for XDHandler {
     ///
     /// * `_ctx`: The context in which this message was sent. Contains information about the bot and its cache
     /// * `_new_message`: The message that was sent and to which this bot should react to.
-    async fn message(&self, _ctx: Context, mut _new_message: Message) {
-        if _new_message.author.bot {
+    async fn message(&self, ctx: Context, mut new_message: Message) {
+        if new_message.author.bot {
             return;
         }
 
-        reply_to(&_ctx, &_new_message, Bots::Autokommentator).await;
+        reply_to(&ctx, &new_message, Bots::Autokommentator).await;
     }
 
     /// Method to be called when the bot instance has been logged in.
@@ -38,13 +38,13 @@ impl EventHandler for XDHandler {
     /// * `_data_about_bot`: Some normal data about the newly created instance
     ///
     /// returns: ()
-    async fn ready(&self, _ctx: Context, _data_about_bot: Ready) {
-        println!("[XD]:\tLogged in as {}", _data_about_bot.user.name);
+    async fn ready(&self, ctx: Context, data_about_bot: Ready) {
+        println!("[XD]:\tLogged in as {}", data_about_bot.user.name);
 
         // Create invite links with only certain permissions
         let permissions =
             Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES | Permissions::EMBED_LINKS;
-        match _data_about_bot.user.invite_url(&_ctx, permissions).await {
+        match data_about_bot.user.invite_url(&ctx, permissions).await {
             Ok(url) => {
                 println!("[XD]:\tBot invitation url is: {}", url);
             }
