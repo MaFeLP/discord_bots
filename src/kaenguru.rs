@@ -6,7 +6,9 @@ use serenity::{
     prelude::*,
 };
 use serenity::utils::Color;
+use crate::config::Bots;
 use crate::kaenguru::euro_to_mark::get_euro;
+use crate::replies::{reply_to, ReplyError};
 
 /// The default struct on which the bot is built
 pub struct KaenguruHandler;
@@ -24,6 +26,19 @@ impl EventHandler for KaenguruHandler {
         // Do not do anything, if the message was sent by a bot.
         if new_message.author.bot {
             return;
+        }
+
+        match reply_to(&ctx, &new_message, Bots::KaenguruKnecht).await {
+            Ok(msg) => {
+                println!("[KG]: Reacted '{}' to message_id: {}", msg, new_message.id);
+                return;
+            },
+            Err(why) => {
+                match why {
+                    ReplyError::MutexAcquisition => eprintln!("Something went wrong acquiring the mutex!"),
+                    ReplyError::NoReplyFound => {}
+                }
+            },
         }
 
         // Check if a € symbol or EUR is in the message, if so try to parse the cash amount
