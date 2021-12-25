@@ -72,6 +72,9 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
         out
     }; // let response
 
+    // We can not unwrap response_option everywhere where response is used, because
+    // Option<String> does not implement the Copy trait, but String does. This is,
+    // why a String is needed from here on.
     let response = match response_option {
         None => return Err(ReplyError::NoReplyFound),
         Some(s) => s,
