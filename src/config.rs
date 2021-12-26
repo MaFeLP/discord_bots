@@ -124,6 +124,21 @@ impl Config {
     }
 }
 
+/// A function to make a configuration file.
+///
+/// # Arguments
+///
+/// * `config_file`: The location where the new config file should be placed.
+///
+/// returns: ()
+///
+/// # Examples
+///
+/// ```
+/// let config_file: String = String::from("config.toml");
+/// let future = make_default_config(&config_file);
+/// block_on(future);
+/// ```
 async fn make_default_config(config_file: &String) {
     // Try to create the file
     let mut file = match File::create(config_file) {
