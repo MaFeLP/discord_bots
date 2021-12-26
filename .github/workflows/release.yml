@@ -1,8 +1,8 @@
-name: "Rolling Release"
+name: "Release"
 
 on:
   push:
-    branches: [ "main" ]
+    tags: "v*"
 
 env:
   CARGO_TERM_COLOR: always
@@ -13,17 +13,21 @@ env:
 
 jobs:
   pre-release:
-    name: "Pre Release"
+    name: "Release"
     runs-on: "ubuntu-latest"
 
     steps:
-      - name: Make Repository name lowercase
+      - name: Make repository name lowercase
         id: name
         uses: ASzc/change-string-case-action@v2
         with:
           string: ${{ env.IMAGE_NAME }}
 
       - uses: actions/checkout@v2
+      
+      - name: Extract tag name
+        id: tag_name
+        run: echo ::set-output name=NAME::$(echo ${{ github.ref }} | cut -d / -f 3)
 
       - name: Setup cross compilation
         run: cargo install cross
@@ -40,10 +44,11 @@ jobs:
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Development Build"
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: ${{ steps.tag_name.outputs.NAME }}
+          prerelease: false
+          draft: true
+          title: ${{ steps.tag_name.outputs.NAME }}
           files: |
             LICENSE
             aarch64-linux-discord_bots
@@ -81,7 +86,8 @@ jobs:
             binary_name=aarch64-linux-discord_bots
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:rolling
+            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:${{ steps.tag_name.outputs.NAME }}-arm
+            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:latest-arm
           labels: ${{ steps.meta.outputs.labels }}
 
       # Build linux/amd64 image
@@ -95,5 +101,6 @@ jobs:
             binary_name=amd64-linux-discord_bots
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:rolling
+            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:${{ steps.tag_name.outputs.NAME }}
+            ${{ env.REGISTRY }}/${{ steps.name.outputs.lowercase }}:latest
           labels: ${{ steps.meta.outputs.labels }}
