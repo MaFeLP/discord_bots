@@ -6,6 +6,7 @@ use std::{
 };
 use std::fs::File;
 use std::io::Write;
+use std::process::exit;
 use serde::Deserialize;
 use toml::value;
 
@@ -113,7 +114,15 @@ impl Config {
             Ok(s) => s
         };
 
-        let out: Config = toml::from_str(&config_content).unwrap();
+        let out: Config = match toml::from_str(&config_content) {
+            Err(_) => {
+                let example_config_file = format!("{}.example", config_file);
+                make_default_config(&example_config_file);
+                eprintln!("Configuration file invalid!\nAn example can be found here: {}", example_config_file);
+                exit(1);
+            },
+            Ok(config) => config,
+        };
         out
     }
 }
