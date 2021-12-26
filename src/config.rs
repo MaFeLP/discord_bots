@@ -1,4 +1,3 @@
-use futures::executor::block_on;
 use std::{
     fs,
     env,
@@ -12,10 +11,6 @@ use toml::value;
 
 /// The response that is injected into a panic, if the config file was configured falsely
 const PANIC_RESPONSE: &str = "Please create a config file yourself or try setting the environment CONFIG_FILE to valid file location!";
-
-// TODO change to master branch on merge
-/// The URL to fetch the default configuration from
-const DEFAULT_CONFIG_URL: &str = "https://raw.githubusercontent.com/MaFeLP/discord_bots/features/config/config.toml.example";
 
 lazy_static! {
     ///
@@ -110,8 +105,7 @@ impl Config {
         if ! Path::new(&config_file).exists() {
             eprintln!("Could not locate Configuration file! Using defaults!");
 
-            let future = make_default_config(&config_file);
-            block_on(future);
+            make_default_config(&config_file);
         }
 
         let config_content = match fs::read_to_string(&config_file) {
@@ -139,26 +133,15 @@ impl Config {
 /// let future = make_default_config(&config_file);
 /// block_on(future);
 /// ```
-async fn make_default_config(config_file: &String) {
+fn make_default_config(config_file: &String) {
     // Try to create the file
     let mut file = match File::create(config_file) {
         Ok(f) => f,
         Err(why) => panic!("Could not create the config file: {:?}.\n{}\n{}", why, PANIC_RESPONSE, why)
     };
 
-    // Get the default config file from github
-    let body = match reqwest::get(DEFAULT_CONFIG_URL).await {
-        Ok(r) => {
-            match r.text().await {
-                Ok(s) => s,
-                Err(why) => panic!("Could not convert config file into string: {:?}\n{}\n{}", why, PANIC_RESPONSE, why)
-            }
-        }
-        Err(err) => panic!("Could not get the default config file: {:?}\n{}\n{}", err, PANIC_RESPONSE, err)
-    };
-
-    // Write the config file into
-    match writeln!(&mut file, "# Config created automatically\n{}", body) {
+    // Write the config file
+    match writeln!(&mut file, "# Config created automatically\n{}", include_str!("../config.toml.example")) {
         Ok(_) => println!("Written default configuration to {}", config_file),
         Err(why) => panic!("Could not write default configuration file to {}: {:?}\n{}\n{}", config_file, why, PANIC_RESPONSE, why)
     };
