@@ -9,4 +9,6 @@ FROM debian:buster-slim
 WORKDIR /app
 #RUN apt-get update && apt-get install -y extra-runtime-dependencies && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /xd_bot /app/xd_bot
+VOLUME /app/config.toml
 CMD ["/app/xd_bot"]
+

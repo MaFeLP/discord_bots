@@ -6,8 +6,9 @@ use serenity::{
     prelude::*,
 };
 use serenity::utils::Color;
-use crate::kaenguru;
+use crate::config::Bots;
 use crate::kaenguru::euro_to_mark::get_euro;
+use crate::replies::reply_to;
 
 /// The default struct on which the bot is built
 pub struct KaenguruHandler;
@@ -21,17 +22,25 @@ impl EventHandler for KaenguruHandler {
     ///
     /// * `_ctx`: The context in which this message was sent. Contains information about the bot and its cache
     /// * `_new_message`: The message that was sent and to which this bot should react to.
-    async fn message(&self, _ctx: Context, mut _new_message: Message) {
+    async fn message(&self, ctx: Context, new_message: Message) {
         // Do not do anything, if the message was sent by a bot.
-        if _new_message.author.bot {
+        if new_message.author.bot {
             return;
         }
 
+        match reply_to(&ctx, &new_message, Bots::KaenguruKnecht).await {
+            Ok(msg) => {
+                println!("[KG]: Reacted '{}' to message_id: {}", msg, new_message.id);
+                return;
+            },
+            Err(_) => {},
+        }
+
         // Check if a € symbol or EUR is in the message, if so try to parse the cash amount
-        if _new_message.content.to_lowercase().contains("€")
-            || _new_message.content.to_lowercase().contains("eur")
+        if new_message.content.to_lowercase().contains("€")
+            || new_message.content.to_lowercase().contains("eur")
         {
-            let number = get_euro(&_new_message.content.to_lowercase());
+            let number = get_euro(&new_message.content.to_lowercase());
 
             // Check if a number was present in the message
             if let Ok(number) = number {
@@ -68,9 +77,9 @@ impl EventHandler for KaenguruHandler {
                 };
 
                 // Send a reply message as an embed
-                match _new_message
+                match new_message
                     .channel_id
-                    .send_message(&_ctx.http, |m| {
+                    .send_message(&ctx.http, |m| {
                         m.embed(|e| {
                             // TODO add Author to the bot instance
                             // Set the description of the description of above
@@ -88,7 +97,7 @@ impl EventHandler for KaenguruHandler {
                             e
                         });
                         // References the original message
-                        m.reference_message(&_new_message);
+                        m.reference_message(&new_message);
                         m.allowed_mentions(|f| {
                             // Need to set this to false, because it would otherwise change the message
                             // background yellow (for the user who wrote it).
@@ -115,12 +124,12 @@ impl EventHandler for KaenguruHandler {
     /// * `_data_about_bot`: Some normal data about the newly created instance
     ///
     /// returns: ()
-    async fn ready(&self, _ctx: Context, _data_about_bot: Ready) {
-        println!("[KG]:\tLogged in as {}", _data_about_bot.user.name);
+    async fn ready(&self, ctx: Context, data_about_bot: Ready) {
+        println!("[KG]:\tLogged in as {}", data_about_bot.user.name);
 
         let permissions =
             Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES | Permissions::EMBED_LINKS;
-        match _data_about_bot.user.invite_url(&_ctx, permissions).await {
+        match data_about_bot.user.invite_url(&ctx, permissions).await {
             Ok(url) => println!("[KG]:\tBot invitation url is: {}", url),
             Err(why) => println!("[KG]:\tError getting invite url: {}", why),
         };

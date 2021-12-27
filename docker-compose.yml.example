@@ -8,3 +8,6 @@ services:
       dockerfile: Dockerfile
     env_file:
       - "./.env"
+    volumes:
+      - "./config.toml:/app/config.toml:r"
+

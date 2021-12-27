@@ -1,0 +1,65 @@
+##############################################################################
+##                          General Configuration                           ##
+##############################################################################
+# A Version stands at the top of every config file. This tells the program,
+# if your current config file is compatible with the version of the program
+# your are running. Usually the config version is the same as the program
+# version:
+# version = "0.2"
+#
+# Every bot has its own configuration section, initialized by [bot-name].
+# Every bot needs to have the token field set to a string and a list of replies
+# The reply list has to follow these guidelines:
+# responses = [
+#     # Add a new trigger
+#     {
+#         # The list of triggers that the bot should react to
+#         # This list can also only hold one item.
+#         trigger = ["trigger 1", "trigger 2"],
+#         # The pool out of which one response_pool is randomly chosen.
+#         # This list can also only hold one item.
+#         response_pool = ["response_pool 1", "response_pool 2"]
+#     }
+# ]
+#
+# Alternatively you can write the replies in the following style:
+# Here you have to add a new entry beginning with [[bot-name.replies]]
+# for every replies entry you want to create
+# [[bot-name.replies]]
+# trigger = [
+#     "trigger 1",
+#     "trigger 2"
+# ]
+# response_pool = [
+#     "response_pool 1",
+#     "response_pool 2"
+# ]
+
+##############################################################################
+##                          Example Configuration                           ##
+##############################################################################
+version = "0.2"
+
+[kaenguru]
+token = "YOUR SECRET TOKEN GOES HERE"
+
+[[kaenguru.responses]]
+trigger = ["schnapspraline"]
+response_pool = [
+    ">Schnapspraline\n\nIch mag Schnapspralinen",
+    "Schnapspraline\n\nWenn ich nur eine Esse, merkt das keiner..."
+]
+
+[[kaenguru.responses]]
+trigger = [
+    "boxen",
+    "box club"
+]
+response_pool = ["Die erste Regel des Boxclubs lautet: Ihr redet nicht über den Boxclub!"]
+
+[autokommentator]
+token = "YOUR SECRET TOKEN GOES HERE"
+responses = [
+    { trigger = ["xd"], response_pool = ["XDDDDD"] },
+    { trigger = ["lul","lel"], response_pool = ["lul"] }
+]
