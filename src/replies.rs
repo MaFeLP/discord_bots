@@ -1,6 +1,8 @@
-use std::sync::Arc;
-use std::thread::sleep;
-use std::time::Duration;
+use std::{
+    sync::Arc,
+    thread::sleep,
+    time::Duration,
+};
 use rand::Rng;
 use serenity::{
     model::{

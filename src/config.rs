@@ -1,12 +1,11 @@
 use std::{
-    fs,
+    fs::{self, File},
     env,
     path::Path,
+    io::Write,
+    process::exit,
     sync::{Arc, Mutex},
 };
-use std::fs::File;
-use std::io::Write;
-use std::process::exit;
 use regex::Regex;
 use serde::Deserialize;
 use toml::value;
