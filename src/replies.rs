@@ -1,7 +1,5 @@
 use std::{
     sync::Arc,
-    thread::sleep,
-    time::Duration,
 };
 use rand::Rng;
 use serenity::{
@@ -56,7 +54,7 @@ pub enum ReplyError {
 pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result<String, ReplyError> {
     let replies: Vec<Response> = {
         let config_arc = Arc::clone(&CONFIG);
-        let mut config_lock = config_arc.lock();
+        let config_lock = config_arc.lock();
         let reply_vector: Vec<Response> = match config_lock {
             Ok(config) => {
                 // Copy replies vector

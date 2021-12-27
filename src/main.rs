@@ -29,7 +29,7 @@ async fn start_xd() {
         Ok(s) => s,
         Err(_) => {
             let config_arc = Arc::clone(&CONFIG);
-            let mut config_lock = config_arc.lock();
+            let config_lock = config_arc.lock();
             let token = match config_lock {
                 Ok(config) => {
                     match &config.autokommentator.token {
@@ -70,7 +70,7 @@ async fn start_kg() {
         Ok(s) => s,
         Err(_) => {
             let config_arc = Arc::clone(&CONFIG);
-            let mut config_lock = config_arc.lock();
+            let config_lock = config_arc.lock();
             let token = match config_lock {
                 Ok(config) => {
                     match &config.kaenguru.token {
