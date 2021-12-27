@@ -188,7 +188,10 @@ fn make_default_config(config_file: &String) {
 fn check_version(config_content: &str) -> (bool, &str) {
     // Get the version, by searching for the config line and getting the version part of it.
     let version = {
-        let captures = VERSION_REGEX.captures(config_content).unwrap();
+        let captures = match VERSION_REGEX.captures(config_content) {
+            None => panic!("Could not find a version in your config file!\n{}", PANIC_RESPONSE),
+            Some(c) => c,
+        };
         let out = captures.name("version").unwrap().as_str();
         dbg!("{}", out);
         out
