@@ -38,6 +38,8 @@ lazy_static! {
     /// ```
     ///
     pub static ref CONFIG: Arc<Mutex<Config>> = Arc::new(Mutex::new(Config::new()));
+
+    static ref VERSION_REGEX: Regex = Regex::new("(?m)^version *= *\"(?P<version>\\d*\\.\\d*)\" *(|#.*)$").unwrap();
 }
 
 #[derive(Deserialize)]
@@ -183,23 +185,21 @@ fn make_default_config(config_file: &String) {
 ///     panic!("Config version incompatible!");
 /// }
 /// ```
-fn check_version(config_content: &String) -> (bool, String) {
-    // Get the version, by looping over the config contents, searching for the config line and
-    // getting the version part of it.
+fn check_version(config_content: &str) -> (bool, &str) {
+    // Get the version, by searching for the config line and getting the version part of it.
     let version = {
-        let version_line = Regex::new("(?m)^version *= *\"(?P<major>\\d*)\\.(?P<minor>\\d*)\" *(|#.*)$").unwrap();
-        let captures = version_line.captures(config_content).unwrap();
-        let out = format!("{}.{}", captures.name("major").unwrap().as_str(), captures.name("minor").unwrap().as_str());
-        dbg!("{}", &out);
+        let captures = VERSION_REGEX.captures(config_content).unwrap();
+        let out = captures.name("version").unwrap().as_str();
+        dbg!("{}", out);
         out
     };
     // Config file is always compatible with its associated program version
-    if format!("{}.{}", env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR")).eq_ignore_ascii_case(&version) {
+    if format!("{}.{}", env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR")).eq_ignore_ascii_case(version) {
         return (true, version);
     }
     // If config file version is not the program version, check if it is still compatible:
     for (major, minor) in COMPATIBLE_VERSIONS {
-        if format!("{}.{}", major, minor).eq_ignore_ascii_case(&version) {
+        if format!("{}.{}", major, minor).eq_ignore_ascii_case(version) {
             return (true, version);
         }
     }
