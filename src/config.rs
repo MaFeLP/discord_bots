@@ -7,11 +7,17 @@ use std::{
 use std::fs::File;
 use std::io::Write;
 use std::process::exit;
+use regex::Regex;
 use serde::Deserialize;
 use toml::value;
 
 /// The response that is injected into a panic, if the config file was configured falsely
 const PANIC_RESPONSE: &str = "Please create a config file yourself or try setting the environment CONFIG_FILE to valid file location!";
+
+/// The versions of the config this program is compatible with
+const COMPATIBLE_VERSIONS: [(u32, u32); 1] = [
+    (0, 2),
+];
 
 lazy_static! {
     ///
@@ -45,6 +51,8 @@ lazy_static! {
 #[derive(Deserialize)]
 /// The default configuration struct that holds the global configuration structure
 pub struct Config {
+    /// The version this config file was created with
+    pub version: String,
     /// Holds configuration for the Autokommentator bot
     pub autokommentator: Autokommentator,
     /// Holds configuration for the Känguru Knecht bot
@@ -114,6 +122,18 @@ impl Config {
             Ok(s) => s
         };
 
+        {
+            let (compatible, version) = check_version(&config_content);
+            if ! compatible {
+                eprintln!("The config file version ({}) is not compatible with your program version ({}.{})!\nPlease inspect the Changelog (https://github.com/MaFeLP/discord_bots/releases) and see how to change the config file accordingly!",
+                          version,
+                          env!("CARGO_PKG_VERSION_MAJOR"),
+                          env!("CARGO_PKG_VERSION_MINOR")
+                );
+                exit(1);
+            }
+        }
+
         let out: Config = match toml::from_str(&config_content) {
             Err(_) => {
                 let example_config_file = format!("{}.example", config_file);
@@ -154,6 +174,50 @@ fn make_default_config(config_file: &String) {
         Ok(_) => println!("Written default configuration to {}", config_file),
         Err(why) => panic!("Could not write default configuration file to {}: {:?}\n{}\n{}", config_file, why, PANIC_RESPONSE, why)
     };
+}
+
+/// Checks if the inputted config is compatible with the program
+///
+/// # Arguments
+///
+/// * `config_content`: The content of the config file to check for compatibility
+///
+/// returns: (bool, String)
+///
+/// # Examples
+///
+/// ```
+/// if ! check_version("config.toml")[0] {
+///     panic!("Config version incompatible!");
+/// }
+/// ```
+fn check_version(config_content: &String) -> (bool, String) {
+    // Get the version, by looping over the config contents, searching for the config line and
+    // getting the version part of it.
+    let version = {
+        let mut out = String::from("0.0");
+        let version_line = Regex::new("^version *= *\"\\d\\.\\d\" *(|#.*)$").unwrap();
+        let version_matcher = Regex::new("(\\d*\\.\\d*)").unwrap();
+        for line in config_content.lines() {
+            if version_line.is_match(line) {
+                out = String::from(version_matcher.find(line).unwrap().as_str());
+                dbg!("{}", line);
+                break;
+            }
+        }
+        out
+    };
+    // Config file is always compatible with its associated program version
+    if format!("{}.{}", env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR")).eq_ignore_ascii_case(&version) {
+        return (true, version);
+    }
+    // If config file version is not the program version, check if it is still compatible:
+    for (major, minor) in COMPATIBLE_VERSIONS {
+        if format!("{}.{}", major, minor).eq_ignore_ascii_case(&version) {
+            return (true, version);
+        }
+    }
+    return (false, version);
 }
 
 ///

@@ -1,6 +1,12 @@
 ##############################################################################
 ##                          General Configuration                           ##
 ##############################################################################
+# A Version stands at the top of every config file. This tells the program,
+# if your current config file is compatible with the version of the program
+# your are running. Usually the config version is the same as the program
+# version:
+# version = "0.2"
+#
 # Every bot has its own configuration section, initialized by [bot-name].
 # Every bot needs to have the token field set to a string and a list of replies
 # The reply list has to follow these guidelines:
@@ -32,6 +38,8 @@
 ##############################################################################
 ##                          Example Configuration                           ##
 ##############################################################################
+version = "0.2"
+
 [kaenguru]
 token = "YOUR SECRET TOKEN GOES HERE"
 
