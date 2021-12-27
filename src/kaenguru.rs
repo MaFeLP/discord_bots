@@ -8,7 +8,7 @@ use serenity::{
 use serenity::utils::Color;
 use crate::config::Bots;
 use crate::kaenguru::euro_to_mark::get_euro;
-use crate::replies::{reply_to, ReplyError};
+use crate::replies::reply_to;
 
 /// The default struct on which the bot is built
 pub struct KaenguruHandler;

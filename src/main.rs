@@ -82,7 +82,6 @@ async fn start_kg() {
                 },
                 Err(why) => {
                     panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
-                    return
                 }
             };
 

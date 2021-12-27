@@ -8,7 +8,7 @@ use serenity::{
     prelude::*,
 };
 use crate::config::Bots;
-use crate::replies::{reply_to, ReplyError};
+use crate::replies::reply_to;
 
 /// The default struct on which the bot is built
 pub struct XDHandler;
