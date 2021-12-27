@@ -188,16 +188,10 @@ fn check_version(config_content: &String) -> (bool, String) {
     // Get the version, by looping over the config contents, searching for the config line and
     // getting the version part of it.
     let version = {
-        let mut out = String::from("0.0");
-        let version_line = Regex::new("^version *= *\"\\d\\.\\d\" *(|#.*)$").unwrap();
-        let version_matcher = Regex::new("(\\d*\\.\\d*)").unwrap();
-        for line in config_content.lines() {
-            if version_line.is_match(line) {
-                out = String::from(version_matcher.find(line).unwrap().as_str());
-                dbg!("{}", line);
-                break;
-            }
-        }
+        let version_line = Regex::new("(?m)^version *= *\"(?P<major>\\d*)\\.(?P<minor>\\d*)\" *(|#.*)$").unwrap();
+        let captures = version_line.captures(config_content).unwrap();
+        let out = format!("{}.{}", captures.name("major").unwrap().as_str(), captures.name("minor").unwrap().as_str());
+        dbg!("{}", &out);
         out
     };
     // Config file is always compatible with its associated program version
