@@ -228,6 +228,6 @@ pub enum Bots {
     /// Represents the Autokommentator bot found in [xd.rs](crate::xd)
     Autokommentator,
 
-    /// Represents the Känguru Nkecht bot found in [kaenguru.rs](crate::kaenguru)
+    /// Represents the Känguru Knecht bot found in [kaenguru.rs](crate::kaenguru)
     KaenguruKnecht,
 }
