@@ -33,12 +33,7 @@ impl EventHandler for KaenguruHandler {
                 println!("[KG]: Reacted '{}' to message_id: {}", msg, new_message.id);
                 return;
             },
-            Err(why) => {
-                match why {
-                    ReplyError::MutexAcquisition => eprintln!("Something went wrong acquiring the mutex!"),
-                    ReplyError::NoReplyFound => {}
-                }
-            },
+            Err(_) => {},
         }
 
         // Check if a € symbol or EUR is in the message, if so try to parse the cash amount

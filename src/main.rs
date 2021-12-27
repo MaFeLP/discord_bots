@@ -41,8 +41,7 @@ async fn start_xd() {
                     }
                 },
                 Err(why) => {
-                    eprintln!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
-                    return
+                    panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
                 }
             };
 
@@ -82,7 +81,7 @@ async fn start_kg() {
                     }
                 },
                 Err(why) => {
-                    eprintln!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
+                    panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
                     return
                 }
             };

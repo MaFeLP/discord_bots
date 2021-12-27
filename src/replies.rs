@@ -12,8 +12,6 @@ use crate::config::{Response, CONFIG, Bots};
 
 /// The Errors that might be thrown by [reply_to]
 pub enum ReplyError {
-    /// If the bot could not acquire a lock of the configuration
-    MutexAcquisition,
     /// If no reply was found in this message.
     /// Can be ignored in most cases.
     NoReplyFound,
@@ -64,8 +62,7 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
                 }
             },
             Err(why) => {
-                eprintln!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
-                return Err(ReplyError::MutexAcquisition);
+                panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
             }
         };
 

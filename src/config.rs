@@ -32,8 +32,7 @@ lazy_static! {
     ///         // Example: String::from(&config.autokommentator.token)
     ///     },
     ///     Err(why) => {
-    ///         eprintln!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
-    ///         return;
+    ///         panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
     ///     }
     /// };
     /// ```
