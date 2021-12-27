@@ -59,8 +59,8 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
             Ok(config) => {
                 // Copy replies vector
                 match bot {
-                    Bots::Autokommentator => config.autokommentator.replies.to_vec(),
-                    Bots::KaenguruKnecht => config.kaenguru.replies.to_vec(),
+                    Bots::Autokommentator => config.autokommentator.responses.to_vec(),
+                    Bots::KaenguruKnecht => config.kaenguru.responses.to_vec(),
                 }
             },
             Err(why) => {
@@ -92,8 +92,8 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
                 {
                     // Select random answer from pool
                     let mut rng = rand::thread_rng();
-                    let response_idx = rng.gen_range(0..reply.response.len());
-                    let response_value: &toml::Value = reply.response.get(response_idx).unwrap();
+                    let response_idx = rng.gen_range(0..reply.response_pool.len());
+                    let response_value: &toml::Value = reply.response_pool.get(response_idx).unwrap();
                     out = Some(String::from(response_value.as_str().unwrap()));
 
                     break;

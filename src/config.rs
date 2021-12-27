@@ -58,7 +58,7 @@ pub struct Kaenguru {
     /// The token that is used to log into discord
     pub token: Option<String>,
     /// The replies and messages that this bot should react to.
-    pub replies: Vec<Response>
+    pub responses: Vec<Response>
 }
 
 #[derive(Deserialize)]
@@ -67,7 +67,7 @@ pub struct Autokommentator {
     /// The token that is used to log into discord
     pub token: Option<String>,
     /// The replies and messages that this bot should react to.
-    pub replies: Vec<Response>
+    pub responses: Vec<Response>
 }
 
 #[derive(Deserialize)]
@@ -77,14 +77,14 @@ pub struct Response {
     pub trigger: value::Array,
     /// A list of strings that are replied to the message:
     /// If there are multiple elements in this list, one is selected randomly.
-    pub response: value::Array,
+    pub response_pool: value::Array,
 }
 
 impl Clone for Response {
     fn clone(&self) -> Self {
         Response {
             trigger: self.trigger.to_vec(),
-            response: self.response.to_vec()
+            response_pool: self.response_pool.to_vec()
         }
     }
 }
