@@ -57,11 +57,6 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
     let replies: Vec<Response> = {
         let config_arc = Arc::clone(&CONFIG);
         let mut config_lock = config_arc.lock();
-        while config_lock.is_err() {
-            dbg!("Could not acquire config lock. Waiting...");
-            sleep(Duration::from_millis(5));
-            config_lock = config_arc.lock();
-        }
         let reply_vector: Vec<Response> = match config_lock {
             Ok(config) => {
                 // Copy replies vector
@@ -70,8 +65,8 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
                     Bots::KaenguruKnecht => config.kaenguru.replies.to_vec(),
                 }
             },
-            Err(_) => {
-                println!("Something went wrong internally...");
+            Err(why) => {
+                eprintln!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
                 return Err(ReplyError::MutexAcquisition);
             }
         };

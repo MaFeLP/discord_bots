@@ -30,11 +30,6 @@ async fn start_xd() {
         Err(_) => {
             let config_arc = Arc::clone(&CONFIG);
             let mut config_lock = config_arc.lock();
-            while config_lock.is_err() {
-                dbg!("Could not acquire config lock. Waiting...");
-                sleep(Duration::from_millis(5));
-                config_lock = config_arc.lock();
-            }
             let token = match config_lock {
                 Ok(config) => {
                     match &config.autokommentator.token {
@@ -45,8 +40,8 @@ async fn start_xd() {
                         }
                     }
                 },
-                Err(_) => {
-                    println!("Something went wrong internally...");
+                Err(why) => {
+                    eprintln!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
                     return
                 }
             };
@@ -76,11 +71,6 @@ async fn start_kg() {
         Err(_) => {
             let config_arc = Arc::clone(&CONFIG);
             let mut config_lock = config_arc.lock();
-            while config_lock.is_err() {
-                dbg!("Could not acquire config lock. Waiting...");
-                sleep(Duration::from_millis(5));
-                config_lock = config_arc.lock();
-            }
             let token = match config_lock {
                 Ok(config) => {
                     match &config.kaenguru.token {
@@ -91,8 +81,8 @@ async fn start_kg() {
                         }
                     }
                 },
-                Err(_) => {
-                    println!("Something went wrong internally...");
+                Err(why) => {
+                    eprintln!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
                     return
                 }
             };
