@@ -95,12 +95,12 @@ fn default_logger(level: log::LevelFilter) -> Handle {
         .appender(
             Appender::builder()
                 .filter(Box::new(ThresholdFilter::new(level)))
-                .filter(Box::new(UpperThresholdFilter::new(LevelFilter::Warn)))
+                .filter(Box::new(UpperThresholdFilter::new(LevelFilter::Info)))
                 .build("stdout", Box::new(stdout)),
         )
         .appender(
             Appender::builder()
-                .filter(Box::new(ThresholdFilter::new(LevelFilter::Info)))
+                .filter(Box::new(ThresholdFilter::new(LevelFilter::Warn)))
                 .build("stderr", Box::new(stderr))
         )
         .logger(
