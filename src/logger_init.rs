@@ -101,7 +101,7 @@ fn default_logger(level: log::LevelFilter) -> Handle {
                 FixedWindowRoller::builder()
                     // TODO make file pattern size configurable in the config file
                     // TODO make log file count configurable in the config file
-                    .build("{}.log.gz", 10).unwrap()
+                    .build("logs/{}.log.gz", 10).unwrap()
             )
         )
     };
