@@ -105,7 +105,7 @@ async fn start_kg() {
 
 /// Main entry point to this program
 fn main() {
-    logger_init();
+    logger_init::init();
 
     println!("[MAIN]:\tStarting \"Känguru Rechenkencht\" and \"XD-Bot\"...");
     // Use tokio to run multiple bots at the same time
