@@ -105,9 +105,8 @@ fn default_logger(level: log::LevelFilter) -> Handle {
         )
         .logger(
             Logger::builder()
-                .appender("logfile")
-                .appender("stdout")
-                .appender("stderr")
+                // There is no need to add the appenders here again, as this would only result in
+                // duplicate log entries.
                 .build("xd_bot", level)
         )
         .build(
