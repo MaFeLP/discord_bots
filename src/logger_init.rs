@@ -63,8 +63,17 @@ impl Filter for UpperThresholdFilter {
 }
 
 fn default_logger(level: log::LevelFilter) -> Handle {
-    let stdout = ConsoleAppender::builder().target(Target::Stdout).build();
-    let stderr = ConsoleAppender::builder().target(Target::Stderr).build();
+    // Global logging pattern
+    let pattern = "{l} - {m}{n}";
+
+    let stdout = ConsoleAppender::builder()
+        .target(Target::Stdout)
+        .encoder(Box::new(PatternEncoder::new(pattern)))
+        .build();
+    let stderr = ConsoleAppender::builder()
+        .target(Target::Stderr)
+        .encoder(Box::new(PatternEncoder::new(pattern)))
+        .build();
 
     // Logging policy: Roll the file over at 10MB size and keep 10 log files as {}.log.gz
     let policy = {
@@ -82,7 +91,7 @@ fn default_logger(level: log::LevelFilter) -> Handle {
     // The Log file to log to and roll over if over policy size
     let logfile = RollingFileAppender::builder()
         .append(true)
-        .encoder(Box::new(PatternEncoder::new("{l} - {m}\n")))
+        .encoder(Box::new(PatternEncoder::new(pattern)))
         .build("logs/latest.log", Box::new(policy))
         .unwrap();
 
