@@ -77,6 +77,7 @@ impl Filter for UpperThresholdFilter {
 /// ```
 fn default_logger(level: log::LevelFilter) -> Handle {
     // Global logging pattern
+    // TODO make pattern configurable in the config file
     let pattern = "{h({d(%Y-%m-%d %H:%M:%S)} [{t}/{l}]: {m:>10.15}{n})}";
 
     // STDOUT and STDERR with the specified pattern
@@ -93,10 +94,13 @@ fn default_logger(level: log::LevelFilter) -> Handle {
     let policy = {
         CompoundPolicy::new(
             Box::new(
+                // TODO make rollover size configurable in the config file
                 SizeTrigger::new(10_000_000) // 10MB
             ),
             Box::new(
                 FixedWindowRoller::builder()
+                    // TODO make file pattern size configurable in the config file
+                    // TODO make log file count configurable in the config file
                     .build("{}.log.gz", 10).unwrap()
             )
         )
@@ -106,6 +110,7 @@ fn default_logger(level: log::LevelFilter) -> Handle {
     let logfile = RollingFileAppender::builder()
         .append(true)
         .encoder(Box::new(PatternEncoder::new(pattern)))
+        // TODO make file pattern size configurable in the config file
         .build("logs/latest.log", Box::new(policy))
         .unwrap();
 
@@ -189,5 +194,6 @@ pub fn init() -> Handle {
 /// logger_init::init();
 /// ```
 pub fn init() -> Handle {
+    // TODO make threshold log level configurable via environment
     default_logger(log::LevelFilter::Info)
 }
