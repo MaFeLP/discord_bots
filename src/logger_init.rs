@@ -62,10 +62,24 @@ impl Filter for UpperThresholdFilter {
     }
 }
 
+/// A function that initializes the global logger.
+///
+/// # Arguments
+///
+/// * `level`: The minimum level to log with: DEBUG/TRACE for debug builds and INFO for releases.
+///
+/// returns: Handle
+///
+/// # Examples
+///
+/// ```
+/// default_logger(LevelFilter::Debug);
+/// ```
 fn default_logger(level: log::LevelFilter) -> Handle {
     // Global logging pattern
     let pattern = "{h({d(%Y-%m-%d %H:%M:%S)} [{t}/{l}]: {m:>10.15}{n})}";
 
+    // STDOUT and STDERR with the specified pattern
     let stdout = ConsoleAppender::builder()
         .target(Target::Stdout)
         .encoder(Box::new(PatternEncoder::new(pattern)))
@@ -75,7 +89,7 @@ fn default_logger(level: log::LevelFilter) -> Handle {
         .encoder(Box::new(PatternEncoder::new(pattern)))
         .build();
 
-    // Logging policy: Roll the file over at 10MB size and keep 10 log files as {}.log.gz
+    // Log file policy: Roll the file over at 10MB size and keep 10 log files as {}.log.gz
     let policy = {
         CompoundPolicy::new(
             Box::new(
@@ -97,45 +111,83 @@ fn default_logger(level: log::LevelFilter) -> Handle {
 
     // the actual configuration
     let config = Config::builder()
+        // Add the logfile appender
         .appender(
             Appender::builder()
                 .build("logfile", Box::new(logfile))
         )
+
+        // Add the stdout appender to log all messages between two thresholds:
+        // Minimum: DEBUG/TRACE on debug builds and INFO on release builds
+        // Maximum: INFO
         .appender(
             Appender::builder()
                 .filter(Box::new(ThresholdFilter::new(level)))
                 .filter(Box::new(UpperThresholdFilter::new(LevelFilter::Info)))
                 .build("stdout", Box::new(stdout)),
         )
+
+        // Add the stderr appender to log all errors and warns to.
+        // This ensures that the admin will get notified about errors, even if they pipe stdout to stderr.
+        // Minimum: WARN
+        // Maximum: N/A
         .appender(
             Appender::builder()
                 .filter(Box::new(ThresholdFilter::new(LevelFilter::Warn)))
                 .build("stderr", Box::new(stderr))
         )
+
+        // Build the normal logger and configure it with the minimum log level for debug/release builds
         .logger(
             Logger::builder()
                 // There is no need to add the appenders here again, as this would only result in
                 // duplicate log entries.
                 .build("xd_bot", level)
         )
+
+        // Configure the default logger
         .build(
             Root::builder()
                 .appender("logfile")
                 .appender("stdout")
                 .appender("stderr")
+
+                // The minimum level is set to WARN, so dependencies do not spam the logs with their
+                // "uninteresting" logs, but can still send warnings.
                 .build(LevelFilter::Warn),
         )
         .unwrap();
 
+    // Initialize the configuration and create the global logger.
     log4rs::init_config(config).unwrap()
 }
 
 #[cfg(debug_assertions)]
+/// A wrapper function for [logger_init::default_logger](crate::logger_init::default_logger).
+/// For debug builds the log level is set down to DEBUG.
+///
+/// returns: Handle
+///
+/// # Examples
+///
+/// ```
+/// logger_init::init();
+/// ```
 pub fn init() -> Handle {
     default_logger(log::LevelFilter::Debug)
 }
 
 #[cfg(not(debug_assertions))]
+/// A wrapper function for [logger_init::default_logger](crate::logger_init::default_logger).
+/// For release builds the log level is set down to INFO.
+///
+/// returns: Handle
+///
+/// # Examples
+///
+/// ```
+/// logger_init::init();
+/// ```
 pub fn init() -> Handle {
     default_logger(log::LevelFilter::Info)
 }
