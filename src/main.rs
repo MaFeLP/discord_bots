@@ -5,6 +5,7 @@ mod kaenguru;
 mod xd;
 mod config;
 mod replies;
+mod logger_init;
 
 use std::{
     borrow::Borrow,
@@ -104,6 +105,8 @@ async fn start_kg() {
 
 /// Main entry point to this program
 fn main() {
+    logger_init();
+
     println!("[MAIN]:\tStarting \"Känguru Rechenkencht\" and \"XD-Bot\"...");
     // Use tokio to run multiple bots at the same time
     let start = Instant::now();
