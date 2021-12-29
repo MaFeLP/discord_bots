@@ -64,7 +64,7 @@ impl Filter for UpperThresholdFilter {
 
 fn default_logger(level: log::LevelFilter) -> Handle {
     // Global logging pattern
-    let pattern = "{l} - {m}{n}";
+    let pattern = "{h({d(%Y-%m-%d %H:%M:%S)} [{t}/{l}]: {m:>10.15}{n})}";
 
     let stdout = ConsoleAppender::builder()
         .target(Target::Stdout)
