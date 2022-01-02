@@ -29,10 +29,8 @@ use log4rs::{
         Handle
     },
 };
-use log::{
-    LevelFilter,
-    Record
-};
+use log::{LevelFilter, Record};
+use std::env;
 
 /// A filter that rejects all events at a level above a provided threshold.
 ///
@@ -76,32 +74,83 @@ impl Filter for UpperThresholdFilter {
 /// default_logger(LevelFilter::Debug);
 /// ```
 fn default_logger(level: log::LevelFilter) -> Handle {
+    // Get changeable logger attributes from environment
+    // Why environment? Because environments are more easily configurable in docker containers
+    // than command line options and the config file is read in later to use this logger.
+
+    let mut warnings: Vec<String> = Vec::new();
     // Global logging pattern
-    // TODO make pattern configurable in the config file
-    let pattern = "{h({d(%Y-%m-%d %H:%M:%S)} [{t}/{l}]: {m:>10.15}{n})}";
+    let pattern = match env::var("LOGGING_PATTERN") {
+        Ok(s) => {
+            warnings.push(format!("Logging pattern has been overridden to: {}", s));
+            s
+        },
+        Err(_) => String::from("{h({d(%Y-%m-%d %H:%M:%S)} [{t}/{l}]: {m:>10.15}{n})}") // Default
+    };
+    // Rollover Size
+    let rollover_size = match env::var("LOGGING_ROLLOVER_SIZE") {
+        Ok(s) => match s.parse::<u64>() {
+            Ok(r) => {
+                warnings.push(format!("Log file rollover size has been overridden to: {}", r));
+                r
+            },
+            Err(_) => {
+                warnings.push(format!("{} is not a valid number! Defaulting to 10,000,000", s));
+                10_000_000
+            }
+        },
+        Err(_) => 10_000_000 // Default
+    };
+    // The logging folder
+    let folder = match env::var("LOGGING_FOLDER") {
+        Ok(s) => {
+            warnings.push(format!("Logging folder has been overridden to: {}", s));
+            s
+        },
+        Err(_) => String::from("logs") // Default
+    };
+    // The log archive pattern
+    let archive_pattern = match env::var("LOGGING_ARCHIVE_PATTERN") {
+        Ok(s) => {
+            warnings.push(format!("Logging archive pattern has been overridden to: {}", s));
+            s
+        },
+        Err(_) => String::from("{}.log.gz") // Default
+    };
+    // Rollover Size
+    let log_file_count = match env::var("LOGGING_FILE_COUNT") {
+        Ok(s) => match s.parse::<u32>() {
+            Ok(r) => {
+                warnings.push(format!("Log file count has been overridden to: {}", r));
+                r
+            },
+            Err(_) => {
+                warnings.push(format!("{} is not a valid number! Defaulting to 10", s));
+                10
+            }
+        },
+        Err(_) => 10 // Default
+    };
 
     // STDOUT and STDERR with the specified pattern
     let stdout = ConsoleAppender::builder()
         .target(Target::Stdout)
-        .encoder(Box::new(PatternEncoder::new(pattern)))
+        .encoder(Box::new(PatternEncoder::new(&pattern)))
         .build();
     let stderr = ConsoleAppender::builder()
         .target(Target::Stderr)
-        .encoder(Box::new(PatternEncoder::new(pattern)))
+        .encoder(Box::new(PatternEncoder::new(&pattern)))
         .build();
 
     // Log file policy: Roll the file over at 10MB size and keep 10 log files as {}.log.gz
     let policy = {
         CompoundPolicy::new(
             Box::new(
-                // TODO make rollover size configurable in the config file
-                SizeTrigger::new(10_000_000) // 10MB
+                SizeTrigger::new(rollover_size) // 10MB
             ),
             Box::new(
                 FixedWindowRoller::builder()
-                    // TODO make file pattern size configurable in the config file
-                    // TODO make log file count configurable in the config file
-                    .build("logs/{}.log.gz", 10).unwrap()
+                    .build(format!("{}/{}", folder, archive_pattern).as_str(), log_file_count).unwrap()
             )
         )
     };
@@ -109,9 +158,8 @@ fn default_logger(level: log::LevelFilter) -> Handle {
     // The Log file to log to and roll over if over policy size
     let logfile = RollingFileAppender::builder()
         .append(true)
-        .encoder(Box::new(PatternEncoder::new(pattern)))
-        // TODO make file pattern size configurable in the config file
-        .build("logs/latest.log", Box::new(policy))
+        .encoder(Box::new(PatternEncoder::new(&pattern)))
+        .build(format!("{}/latest.log", folder), Box::new(policy))
         .unwrap();
 
     // the actual configuration
@@ -184,7 +232,7 @@ pub fn init() -> Handle {
 
 #[cfg(not(debug_assertions))]
 /// A wrapper function for [logger_init::default_logger](crate::logger_init::default_logger).
-/// For release builds the log level is set down to INFO.
+/// For release builds the log level is set down to INFO, if not set via the environment.
 ///
 /// returns: Handle
 ///
@@ -194,6 +242,26 @@ pub fn init() -> Handle {
 /// logger_init::init();
 /// ```
 pub fn init() -> Handle {
-    // TODO make threshold log level configurable via environment
-    default_logger(log::LevelFilter::Info)
+    use log::LevelFilter::*;
+
+    let logging_level = match env::var("LOGGING_LEVEL_THRESHOLD") {
+        Ok(s) => {
+            match s.to_ascii_lowercase().as_str() {
+                "trace" => Trace,
+                "debug" => Debug,
+                "info" => Info,
+                "warn" => Warn,
+                "error" => Error,
+                _ => Info,
+            }
+        },
+        Err(_) => Info,
+    };
+    let handle = default_logger(logging_level);
+
+    if logging_level != Info {
+        log::warn!("Default logging level has been overridden to: {}", logging_level);
+    }
+
+    handle
 }
