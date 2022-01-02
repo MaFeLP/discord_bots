@@ -29,7 +29,7 @@ use log4rs::{
         Handle
     },
 };
-use log::{LevelFilter, Record};
+use log::{LevelFilter, Record, warn};
 use std::env;
 
 /// A filter that rejects all events at a level above a provided threshold.
@@ -212,7 +212,13 @@ fn default_logger(level: log::LevelFilter) -> Handle {
         .unwrap();
 
     // Initialize the configuration and create the global logger.
-    log4rs::init_config(config).unwrap()
+    let handle = log4rs::init_config(config).unwrap();
+
+    for msg in warnings {
+        warn!(target: "xdbot", "{}", msg);
+    }
+
+    handle
 }
 
 #[cfg(debug_assertions)]
