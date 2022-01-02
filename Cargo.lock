@@ -1625,6 +1625,7 @@ dependencies = [
 name = "xd_bot"
 version = "0.2.0"
 dependencies = [
+ "anyhow",
  "ctrlc",
  "lazy_static",
  "log",
