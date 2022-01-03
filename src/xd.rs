@@ -1,3 +1,4 @@
+use log::{error, info};
 use serenity::{
     async_trait,
     model::{
@@ -27,12 +28,8 @@ impl EventHandler for XDHandler {
             return;
         }
 
-        match reply_to(&ctx, &new_message, Bots::Autokommentator).await {
-            Ok(msg) => {
-                println!("[XD]: Reacted '{}' to message_id: {}", msg, new_message.id);
-                return;
-            },
-            Err(_) => {},
+        if let Ok(_) = reply_to(&ctx, &new_message, Bots::Autokommentator).await {
+            return;
         }
     }
 
@@ -45,19 +42,13 @@ impl EventHandler for XDHandler {
     ///
     /// returns: ()
     async fn ready(&self, ctx: Context, data_about_bot: Ready) {
-        println!("[XD]:\tLogged in as {}", data_about_bot.user.name);
+        info!("Logged in as {}", data_about_bot.user.name);
 
-        // Create invite links with only certain permissions
         let permissions =
             Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES | Permissions::EMBED_LINKS;
         match data_about_bot.user.invite_url(&ctx, permissions).await {
-            Ok(url) => {
-                println!("[XD]:\tBot invitation url is: {}", url);
-            }
-            Err(why) => {
-                println!("[XD:]\tError getting invite url: {}", why);
-                return;
-            }
+            Ok(url) => info!("Bot invitation url is: {}", url),
+            Err(why) => error!("Error getting invite url: {}", why),
         };
     }
 }
