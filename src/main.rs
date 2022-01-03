@@ -110,7 +110,14 @@ fn main() {
 
     info!("Running discord_bots version {}{}",
         env!("CARGO_PKG_VERSION"),
-        env!("GIT_HASH")
+        {
+            // Only print the git hash, if it is not empty.
+            if env!("GIT_HASH").eq_ignore_ascii_case("") {
+                String::new()
+            } else {
+                format!(" (git ref: {})", env!("GIT_HASH"))
+            }
+        }
     );
     info!("Starting \"Känguru Rechenkencht\" and \"XD-Bot\"...");
     // Use tokio to run multiple bots at the same time
