@@ -5,10 +5,11 @@ use log4rs::{
             Target
         },
         rolling_file::{
+            LogFile,
             policy::compound::{
                 CompoundPolicy,
                 roll::fixed_window::FixedWindowRoller,
-                trigger::size::SizeTrigger,
+                trigger::Trigger,
             },
             RollingFileAppender,
         },
@@ -31,6 +32,8 @@ use log4rs::{
 };
 use log::{LevelFilter, Record, warn};
 use std::env;
+use std::path::Path;
+use std::sync::{Arc, Mutex};
 
 /// A filter that rejects all events at a level above a provided threshold.
 ///
@@ -57,6 +60,40 @@ impl Filter for UpperThresholdFilter {
         } else {
             Response::Neutral
         }
+    }
+}
+
+/// A trigger which rolls the log once it has passed a certain size
+/// or the global static `LOG_FILE_EXISTS` is `true`.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
+pub struct CustomTrigger {
+    limit: u64,
+}
+
+impl CustomTrigger {
+    /// Returns a new trigger which rolls the log once it has passed the
+    /// specified size in bytes or the global static `LOG_FILE_EXISTS` is `true`.
+    pub fn new(limit: u64) -> CustomTrigger {
+        CustomTrigger {
+            limit,
+        }
+    }
+}
+
+lazy_static!(
+    static ref LOG_FILE_EXISTS: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
+);
+
+impl Trigger for CustomTrigger {
+    fn trigger(&self, logfile: &LogFile) -> anyhow::Result<bool> {
+        let mut log_file_exists = LOG_FILE_EXISTS.lock().unwrap();
+        let roll: bool = (logfile.len_estimate() > self.limit) || *log_file_exists;
+
+        if *log_file_exists {
+            *log_file_exists = false;
+        }
+
+        Ok(roll)
     }
 }
 
@@ -146,7 +183,7 @@ fn default_logger(level: log::LevelFilter) -> Handle {
     let policy = {
         CompoundPolicy::new(
             Box::new(
-                SizeTrigger::new(rollover_size) // 10MB
+                CustomTrigger::new(rollover_size), // 10MB
             ),
             Box::new(
                 FixedWindowRoller::builder()
@@ -156,10 +193,16 @@ fn default_logger(level: log::LevelFilter) -> Handle {
     };
 
     // The Log file to log to and roll over if over policy size
+    let log_file_path = format!("{}/latest.log", folder);
+    if Path::new(&log_file_path).exists() {
+        // If it exists, roll over before first log entry.
+        let mut log_file_exists = LOG_FILE_EXISTS.lock().unwrap();
+        *log_file_exists = true;
+    }
     let logfile = RollingFileAppender::builder()
         .append(true)
         .encoder(Box::new(PatternEncoder::new(&pattern)))
-        .build(format!("{}/latest.log", folder), Box::new(policy))
+        .build(Path::new(&log_file_path), Box::new(policy))
         .unwrap();
 
     // the actual configuration
