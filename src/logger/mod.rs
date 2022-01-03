@@ -5,11 +5,9 @@ use log4rs::{
             Target
         },
         rolling_file::{
-            LogFile,
             policy::compound::{
                 CompoundPolicy,
                 roll::fixed_window::FixedWindowRoller,
-                trigger::Trigger,
             },
             RollingFileAppender,
         },
@@ -21,81 +19,22 @@ use log4rs::{
     },
     encode::pattern::PatternEncoder,
     filter::{
-        Filter,
         threshold::ThresholdFilter,
-        Response,
     },
     {
         Config,
         Handle
     },
 };
-use log::{LevelFilter, Record, warn};
+use log::{LevelFilter, warn};
 use std::env;
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+use crate::logger::custom::{
+    trigger::{CustomTrigger, LOG_FILE_EXISTS},
+    filter::UpperThresholdFilter,
+};
 
-/// A filter that rejects all events at a level above a provided threshold.
-///
-/// Upper Threshold implemented here, as log4rs doesn't have it.
-/// This is copied from [the official documentation](https://docs.rs/log4rs/latest/src/log4rs/filter/threshold.rs.html#20-22)
-/// with `>` in the function `filter` changed to `<`.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub struct UpperThresholdFilter {
-    level: LevelFilter,
-}
-
-impl UpperThresholdFilter {
-    /// Creates a new `ThresholdFilter` with the specified maximum logging
-    pub fn new(level: LevelFilter) -> UpperThresholdFilter {
-        UpperThresholdFilter { level }
-    }
-}
-
-impl Filter for UpperThresholdFilter {
-    fn filter(&self, record: &Record) -> Response {
-        // Changed from `>` to `<`.
-        if record.level() < self.level {
-            Response::Reject
-        } else {
-            Response::Neutral
-        }
-    }
-}
-
-/// A trigger which rolls the log once it has passed a certain size
-/// or the global static `LOG_FILE_EXISTS` is `true`.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
-pub struct CustomTrigger {
-    limit: u64,
-}
-
-impl CustomTrigger {
-    /// Returns a new trigger which rolls the log once it has passed the
-    /// specified size in bytes or the global static `LOG_FILE_EXISTS` is `true`.
-    pub fn new(limit: u64) -> CustomTrigger {
-        CustomTrigger {
-            limit,
-        }
-    }
-}
-
-lazy_static!(
-    static ref LOG_FILE_EXISTS: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
-);
-
-impl Trigger for CustomTrigger {
-    fn trigger(&self, logfile: &LogFile) -> anyhow::Result<bool> {
-        let mut log_file_exists = LOG_FILE_EXISTS.lock().unwrap();
-        let roll: bool = (logfile.len_estimate() > self.limit) || *log_file_exists;
-
-        if *log_file_exists {
-            *log_file_exists = false;
-        }
-
-        Ok(roll)
-    }
-}
+mod custom;
 
 /// A function that initializes the global logger.
 ///
