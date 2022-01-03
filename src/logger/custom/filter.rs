@@ -21,7 +21,7 @@ pub struct UpperThresholdFilter {
 }
 
 impl UpperThresholdFilter {
-    /// Creates a new `ThresholdFilter` with the specified maximum logging
+    /// Creates a new `UpperThresholdFilter` with the specified maximum logging
     ///
     /// # Arguments
     ///

@@ -166,7 +166,7 @@ fn default_logger(level: log::LevelFilter) {
             Box::new(
                 FixedWindowRoller::builder()
                     .build(
-                        format!("{}/{}", folder, archive_pattern).as_str(),
+                        &format!("{}/{}", folder, archive_pattern),
                         log_file_count,
                     )
                     .unwrap(),
@@ -232,7 +232,7 @@ fn default_logger(level: log::LevelFilter) {
     log4rs::init_config(config).unwrap();
 
     for msg in warnings {
-        warn!(target: "xdbot", "{}", msg);
+        warn!(target: "xd_bot", "{}", msg);
     }
 }
 
