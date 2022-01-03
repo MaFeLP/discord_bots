@@ -1,5 +1,5 @@
-use log4rs::filter::{Filter, Response};
 use log::{LevelFilter, Record};
+use log4rs::filter::{Filter, Response};
 
 /// A filter that rejects all events at a level above a provided threshold.
 ///
@@ -28,4 +28,3 @@ impl Filter for UpperThresholdFilter {
         }
     }
 }
-

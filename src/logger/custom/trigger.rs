@@ -1,5 +1,5 @@
+use log4rs::append::rolling_file::{policy::compound::trigger::Trigger, LogFile};
 use std::sync::{Arc, Mutex};
-use log4rs::append::rolling_file::{LogFile, policy::compound::trigger::Trigger};
 
 /// A trigger which rolls the log once it has passed a certain size
 /// or the global static `LOG_FILE_EXISTS` is `true`.
@@ -12,9 +12,7 @@ impl CustomTrigger {
     /// Returns a new trigger which rolls the log once it has passed the
     /// specified size in bytes or the global static `LOG_FILE_EXISTS` is `true`.
     pub fn new(limit: u64) -> CustomTrigger {
-        CustomTrigger {
-            limit,
-        }
+        CustomTrigger { limit }
     }
 }
 

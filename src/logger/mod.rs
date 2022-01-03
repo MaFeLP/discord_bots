@@ -1,38 +1,23 @@
+use crate::logger::custom::{
+    filter::UpperThresholdFilter,
+    trigger::{CustomTrigger, LOG_FILE_EXISTS},
+};
+use log::{warn, LevelFilter};
 use log4rs::{
     append::{
-        console::{
-            ConsoleAppender,
-            Target
-        },
+        console::{ConsoleAppender, Target},
         rolling_file::{
-            policy::compound::{
-                CompoundPolicy,
-                roll::fixed_window::FixedWindowRoller,
-            },
+            policy::compound::{roll::fixed_window::FixedWindowRoller, CompoundPolicy},
             RollingFileAppender,
         },
     },
-    config::{
-        Appender,
-        Logger,
-        Root,
-    },
+    config::{Appender, Logger, Root},
     encode::pattern::PatternEncoder,
-    filter::{
-        threshold::ThresholdFilter,
-    },
-    {
-        Config,
-        Handle
-    },
+    filter::threshold::ThresholdFilter,
+    {Config, Handle},
 };
-use log::{LevelFilter, warn};
 use std::env;
 use std::path::Path;
-use crate::logger::custom::{
-    trigger::{CustomTrigger, LOG_FILE_EXISTS},
-    filter::UpperThresholdFilter,
-};
 
 mod custom;
 
@@ -60,38 +45,47 @@ fn default_logger(level: log::LevelFilter) -> Handle {
         Ok(s) => {
             warnings.push(format!("Logging pattern has been overridden to: {}", s));
             s
-        },
-        Err(_) => String::from("{h({d(%Y-%m-%d %H:%M:%S)} [{t}/{l}]: {m:>10.15}{n})}") // Default
+        }
+        Err(_) => String::from("{h({d(%Y-%m-%d %H:%M:%S)} [{t}/{l}]: {m:>10.15}{n})}"), // Default
     };
     // Rollover Size
     let rollover_size = match env::var("LOGGING_ROLLOVER_SIZE") {
         Ok(s) => match s.parse::<u64>() {
             Ok(r) => {
-                warnings.push(format!("Log file rollover size has been overridden to: {}", r));
+                warnings.push(format!(
+                    "Log file rollover size has been overridden to: {}",
+                    r
+                ));
                 r
-            },
+            }
             Err(_) => {
-                warnings.push(format!("{} is not a valid number! Defaulting to 10,000,000", s));
+                warnings.push(format!(
+                    "{} is not a valid number! Defaulting to 10,000,000",
+                    s
+                ));
                 10_000_000
             }
         },
-        Err(_) => 10_000_000 // Default
+        Err(_) => 10_000_000, // Default
     };
     // The logging folder
     let folder = match env::var("LOGGING_FOLDER") {
         Ok(s) => {
             warnings.push(format!("Logging folder has been overridden to: {}", s));
             s
-        },
-        Err(_) => String::from("logs") // Default
+        }
+        Err(_) => String::from("logs"), // Default
     };
     // The log archive pattern
     let archive_pattern = match env::var("LOGGING_ARCHIVE_PATTERN") {
         Ok(s) => {
-            warnings.push(format!("Logging archive pattern has been overridden to: {}", s));
+            warnings.push(format!(
+                "Logging archive pattern has been overridden to: {}",
+                s
+            ));
             s
-        },
-        Err(_) => String::from("{}.log.gz") // Default
+        }
+        Err(_) => String::from("{}.log.gz"), // Default
     };
     // Rollover Size
     let log_file_count = match env::var("LOGGING_FILE_COUNT") {
@@ -99,13 +93,13 @@ fn default_logger(level: log::LevelFilter) -> Handle {
             Ok(r) => {
                 warnings.push(format!("Log file count has been overridden to: {}", r));
                 r
-            },
+            }
             Err(_) => {
                 warnings.push(format!("{} is not a valid number! Defaulting to 10", s));
                 10
             }
         },
-        Err(_) => 10 // Default
+        Err(_) => 10, // Default
     };
 
     // STDOUT and STDERR with the specified pattern
@@ -126,8 +120,12 @@ fn default_logger(level: log::LevelFilter) -> Handle {
             ),
             Box::new(
                 FixedWindowRoller::builder()
-                    .build(format!("{}/{}", folder, archive_pattern).as_str(), log_file_count).unwrap()
-            )
+                    .build(
+                        format!("{}/{}", folder, archive_pattern).as_str(),
+                        log_file_count,
+                    )
+                    .unwrap(),
+            ),
         )
     };
 
@@ -147,11 +145,7 @@ fn default_logger(level: log::LevelFilter) -> Handle {
     // the actual configuration
     let config = Config::builder()
         // Add the logfile appender
-        .appender(
-            Appender::builder()
-                .build("logfile", Box::new(logfile))
-        )
-
+        .appender(Appender::builder().build("logfile", Box::new(logfile)))
         // Add the stdout appender to log all messages between two thresholds:
         // Minimum: DEBUG/TRACE on debug builds and INFO on release builds
         // Maximum: INFO
@@ -161,7 +155,6 @@ fn default_logger(level: log::LevelFilter) -> Handle {
                 .filter(Box::new(UpperThresholdFilter::new(LevelFilter::Info)))
                 .build("stdout", Box::new(stdout)),
         )
-
         // Add the stderr appender to log all errors and warns to.
         // This ensures that the admin will get notified about errors, even if they pipe stdout to stderr.
         // Minimum: WARN
@@ -169,24 +162,21 @@ fn default_logger(level: log::LevelFilter) -> Handle {
         .appender(
             Appender::builder()
                 .filter(Box::new(ThresholdFilter::new(LevelFilter::Warn)))
-                .build("stderr", Box::new(stderr))
+                .build("stderr", Box::new(stderr)),
         )
-
         // Build the normal logger and configure it with the minimum log level for debug/release builds
         .logger(
             Logger::builder()
                 // There is no need to add the appenders here again, as this would only result in
                 // duplicate log entries.
-                .build("xd_bot", level)
+                .build("xd_bot", level),
         )
-
         // Configure the default logger
         .build(
             Root::builder()
                 .appender("logfile")
                 .appender("stdout")
                 .appender("stderr")
-
                 // The minimum level is set to WARN, so dependencies do not spam the logs with their
                 // "uninteresting" logs, but can still send warnings.
                 .build(LevelFilter::Warn),
@@ -233,22 +223,23 @@ pub fn init() -> Handle {
     use log::LevelFilter::*;
 
     let logging_level = match env::var("LOGGING_LEVEL_THRESHOLD") {
-        Ok(s) => {
-            match s.to_ascii_lowercase().as_str() {
-                "trace" => Trace,
-                "debug" => Debug,
-                "info" => Info,
-                "warn" => Warn,
-                "error" => Error,
-                _ => Info,
-            }
+        Ok(s) => match s.to_ascii_lowercase().as_str() {
+            "trace" => Trace,
+            "debug" => Debug,
+            "info" => Info,
+            "warn" => Warn,
+            "error" => Error,
+            _ => Info,
         },
         Err(_) => Info,
     };
     let handle = default_logger(logging_level);
 
     if logging_level != Info {
-        log::warn!("Default logging level has been overridden to: {}", logging_level);
+        log::warn!(
+            "Default logging level has been overridden to: {}",
+            logging_level
+        );
     }
 
     handle
