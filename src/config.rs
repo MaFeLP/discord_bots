@@ -6,6 +6,7 @@ use std::{
     process::exit,
     sync::{Arc, Mutex},
 };
+use log::{debug, error, info, trace, warn};
 use regex::Regex;
 use serde::Deserialize;
 use toml::value;
@@ -101,12 +102,19 @@ impl Config {
     pub fn new() -> Self {
         // Read in config file location
         let config_file = match env::var("CONFIG_FILE") {
-            Ok(o) => o,
-            Err(_) => "config.toml".to_string()
+            Ok(o) => {
+                warn!("Config file location has been overridden to: \"{}\"", o);
+                o
+            },
+            Err(_) => {
+                debug!("Config file location has not changed. Using default \"config.toml\"...");
+                "config.toml".to_string()
+            }
+
         };
 
         if ! Path::new(&config_file).exists() {
-            eprintln!("Could not locate Configuration file! Using defaults!");
+            warn!("Could not locate Configuration file! Using defaults!");
 
             make_default_config(&config_file);
         }
@@ -115,11 +123,14 @@ impl Config {
             Err(_) => panic!("Could not load configuration file contents!"),
             Ok(s) => s
         };
+        debug!("Configuration has been loaded!");
+        trace!("Contents:\n{}", config_content);
 
+        info!("Checking version of the configuration...");
         {
             let (compatible, version) = check_version(&config_content);
             if ! compatible {
-                eprintln!("The config file version ({}) is not compatible with your program version ({}.{})!\nPlease inspect the Changelog (https://github.com/MaFeLP/discord_bots/releases) and see how to change the config file accordingly!",
+                error!("The config file version ({}) is not compatible with your program version ({}.{})!\nPlease inspect the Changelog (https://github.com/MaFeLP/discord_bots/releases) and see how to change the config file accordingly!",
                           version,
                           env!("CARGO_PKG_VERSION_MAJOR"),
                           env!("CARGO_PKG_VERSION_MINOR")
@@ -127,16 +138,20 @@ impl Config {
                 exit(1);
             }
         }
+        info!("Configuration version compatible!");
 
+        info!("Parsing configuration...");
         let out: Config = match toml::from_str(&config_content) {
             Err(_) => {
                 let example_config_file = format!("{}.example", config_file);
                 make_default_config(&example_config_file);
-                eprintln!("Configuration file invalid!\nAn example can be found here: {}", example_config_file);
+                error!("Configuration file invalid!");
+                error!("An example can be found here: {}", example_config_file);
                 exit(1);
             },
             Ok(config) => config,
         };
+        info!("Configuration now usable!");
         out
     }
 }
@@ -157,17 +172,21 @@ impl Config {
 /// block_on(future);
 /// ```
 fn make_default_config(config_file: &String) {
+    debug!("Creating default configuration...");
+    trace!("Creating configuration file...");
     // Try to create the file
     let mut file = match File::create(config_file) {
         Ok(f) => f,
         Err(why) => panic!("Could not create the config file: {:?}.\n{}\n{}", why, PANIC_RESPONSE, why)
     };
 
+    trace!("Writing defaults to file...");
     // Write the config file
     match writeln!(&mut file, "# Config created automatically\n{}", include_str!("../config.toml.example")) {
         Ok(_) => println!("Written default configuration to {}", config_file),
         Err(why) => panic!("Could not write default configuration file to {}: {:?}\n{}\n{}", config_file, why, PANIC_RESPONSE, why)
     };
+    debug!("Default configuration has been created!");
 }
 
 /// Checks if the inputted config is compatible with the program
@@ -189,20 +208,33 @@ fn check_version(config_content: &str) -> (bool, &str) {
     // Get the version, by searching for the config line and getting the version part of it.
     let version = {
         let captures = match VERSION_REGEX.captures(config_content) {
-            None => panic!("Could not find a version in your config file!\n{}", PANIC_RESPONSE),
             Some(c) => c,
+            None => {
+                error!("Could not find a version in your config file!");
+                error!("{}", PANIC_RESPONSE);
+                exit(1);
+            }
         };
         let out = captures.name("version").unwrap().as_str();
-        dbg!("{}", out);
+        debug!("Found version in config file: {}", out);
         out
     };
     // Config file is always compatible with its associated program version
     if format!("{}.{}", env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR")).eq_ignore_ascii_case(version) {
+        debug!("Config file version ({}) is the same as program version ({}). Result: Compatible",
+            version,
+            version
+        );
         return (true, version);
     }
     // If config file version is not the program version, check if it is still compatible:
     for (major, minor) in COMPATIBLE_VERSIONS {
         if format!("{}.{}", major, minor).eq_ignore_ascii_case(version) {
+            debug!("Config file version ({}) is the same as program version ({}.{}). Result: Compatible",
+                version,
+                major,
+                minor
+            );
             return (true, version);
         }
     }
