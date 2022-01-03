@@ -1,5 +1,6 @@
 mod euro_to_mark;
 
+use log::{debug, error, info, trace};
 use serenity::{
     async_trait,
     model::{channel::Message, gateway::Ready, Permissions},
@@ -28,14 +29,11 @@ impl EventHandler for KaenguruHandler {
             return;
         }
 
-        match reply_to(&ctx, &new_message, Bots::KaenguruKnecht).await {
-            Ok(msg) => {
-                println!("[KG]: Reacted '{}' to message_id: {}", msg, new_message.id);
-                return;
-            },
-            Err(_) => {},
+        if let Ok(_) = reply_to(&ctx, &new_message, Bots::KaenguruKnecht).await {
+            return;
         }
 
+        trace!("Checking for any amount of euros in the message...");
         // Check if a € symbol or EUR is in the message, if so try to parse the cash amount
         if new_message.content.to_lowercase().contains("€")
             || new_message.content.to_lowercase().contains("eur")
@@ -45,7 +43,7 @@ impl EventHandler for KaenguruHandler {
             // Check if a number was present in the message
             if let Ok(number) = number {
                 if number == 0 {
-                    println!("[KG]:\tMessage did not contain a number to convert to EUROs. Returning.");
+                    debug!("Message did not contain a number to convert to EUROs. Returning.");
                     return;
                 }
                 let description = match number > 100_000 {
@@ -109,8 +107,12 @@ impl EventHandler for KaenguruHandler {
                     })
                     .await
                 {
-                    Ok(msg) => println!("[KG]:\tSending money Message to {}", msg.channel_id),
-                    Err(why) => println!("[KG]:\tError sending message: {:?}", why),
+                    // TODO add channel name (utils::get_channel function)
+                    Ok(msg) => info!("Sending \"{}\" + embed to {}",
+                        description.replace("\n", "\\n"),
+                        msg.channel_id
+                    ),
+                    Err(why) => error!("Error sending message: {:?}", why),
                 };
             };
         }
@@ -125,13 +127,13 @@ impl EventHandler for KaenguruHandler {
     ///
     /// returns: ()
     async fn ready(&self, ctx: Context, data_about_bot: Ready) {
-        println!("[KG]:\tLogged in as {}", data_about_bot.user.name);
+        info!("Logged in as {}", data_about_bot.user.name);
 
         let permissions =
             Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES | Permissions::EMBED_LINKS;
         match data_about_bot.user.invite_url(&ctx, permissions).await {
-            Ok(url) => println!("[KG]:\tBot invitation url is: {}", url),
-            Err(why) => println!("[KG]:\tError getting invite url: {}", why),
+            Ok(url) => info!("Bot invitation url is: {}", url),
+            Err(why) => error!("Error getting invite url: {}", why),
         };
     }
 }
