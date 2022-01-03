@@ -41,7 +41,7 @@ lazy_static!(
     /// It is set, by [default_logger](crate::logger::default_logger) before the configuration
     /// is constructed. It **should only be unset by [CustomTrigger::trigger]**, when the logfile
     /// has been rolled over **ONCE** at program startup!
-    pub static ref LOG_FILE_EXISTS: Arc<Mutex<bool>> = Arc::new(Mutex::new(false));
+    pub static ref LOG_FILE_EXISTS: Mutex<bool> = Mutex::new(false);
 );
 
 impl Trigger for CustomTrigger {
