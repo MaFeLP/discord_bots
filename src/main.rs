@@ -107,6 +107,10 @@ async fn start_kg() {
 fn main() {
     logger::init();
 
+    info!("Running discord_bots version {}{}",
+        env!("CARGO_PKG_VERSION"),
+        env!("GIT_HASH")
+    );
     println!("[MAIN]:\tStarting \"Känguru Rechenkencht\" and \"XD-Bot\"...");
     // Use tokio to run multiple bots at the same time
     let start = Instant::now();
