@@ -39,7 +39,6 @@ use log4rs::{
 };
 use std::path::Path;
 use std::{env, fs};
-use toml::Value::String;
 
 mod custom;
 
@@ -62,23 +61,17 @@ fn default_logger(level: log::LevelFilter) {
     // Give the user to specify their own logging file
     match env::var("LOGGING_CONFIG_FILE") {
         Ok(s) => {
-            if Path::new(&logging_file_path).exists() {
-                match log4rs::init_file(&logging_file_path, Deserializers::default()) {
+            if Path::new(&s).exists() {
+                match log4rs::init_file(&s, Deserializers::default()) {
                     Ok(_) => {
-                        warn!(
-                            "Using custom logger configuration at: {}",
-                            logging_file_path
-                        );
-                        trace!(
-                            "Config contents:\n{}",
-                            fs::read_to_string(&logging_file_path).unwrap()
-                        );
+                        warn!("Using custom logger configuration at: {}", s);
+                        trace!("Config contents:\n{}", fs::read_to_string(&s).unwrap());
                         return;
                     }
                     Err(why) => {
                         warnings.push(format!(
                             "\"{}\" is not a valid config file. Using defaults!",
-                            logging_file_path
+                            s
                         ));
                         warnings.push(format!("Error message: {}", why));
                     }
