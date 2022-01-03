@@ -22,7 +22,8 @@ use crate::logger::custom::{
     filter::UpperThresholdFilter,
     trigger::{CustomTrigger, LOG_FILE_EXISTS},
 };
-use log::{warn, LevelFilter};
+use log::{trace, warn, LevelFilter};
+use log4rs::config::Deserializers;
 use log4rs::{
     append::{
         console::{ConsoleAppender, Target},
@@ -34,10 +35,11 @@ use log4rs::{
     config::{Appender, Logger, Root},
     encode::pattern::PatternEncoder,
     filter::threshold::ThresholdFilter,
-    {Config, Handle},
+    Config,
 };
-use std::env;
 use std::path::Path;
+use std::{env, fs};
+use toml::Value::String;
 
 mod custom;
 
@@ -54,12 +56,42 @@ mod custom;
 /// ```
 /// default_logger(LevelFilter::Debug);
 /// ```
-fn default_logger(level: log::LevelFilter) -> Handle {
+fn default_logger(level: log::LevelFilter) {
+    let mut warnings: Vec<String> = Vec::new();
+
+    // Give the user to specify their own logging file
+    match env::var("LOGGING_CONFIG_FILE") {
+        Ok(s) => {
+            if Path::new(&logging_file_path).exists() {
+                match log4rs::init_file(&logging_file_path, Deserializers::default()) {
+                    Ok(_) => {
+                        warn!(
+                            "Using custom logger configuration at: {}",
+                            logging_file_path
+                        );
+                        trace!(
+                            "Config contents:\n{}",
+                            fs::read_to_string(&logging_file_path).unwrap()
+                        );
+                        return;
+                    }
+                    Err(why) => {
+                        warnings.push(format!(
+                            "\"{}\" is not a valid config file. Using defaults!",
+                            logging_file_path
+                        ));
+                        warnings.push(format!("Error message: {}", why));
+                    }
+                }
+            }
+        }
+        _ => {}
+    }
+
     // Get changeable logger attributes from environment
     // Why environment? Because environments are more easily configurable in docker containers
     // than command line options and the config file is read in later to use this logger.
 
-    let mut warnings: Vec<String> = Vec::new();
     // Global logging pattern
     let pattern = match env::var("LOGGING_PATTERN") {
         Ok(s) => {
@@ -204,13 +236,11 @@ fn default_logger(level: log::LevelFilter) -> Handle {
         .unwrap();
 
     // Initialize the configuration and create the global logger.
-    let handle = log4rs::init_config(config).unwrap();
+    log4rs::init_config(config).unwrap();
 
     for msg in warnings {
         warn!(target: "xdbot", "{}", msg);
     }
-
-    handle
 }
 
 #[cfg(debug_assertions)]
@@ -224,7 +254,7 @@ fn default_logger(level: log::LevelFilter) -> Handle {
 /// ```
 /// logger_init::init();
 /// ```
-pub fn init() -> Handle {
+pub fn init() {
     default_logger(log::LevelFilter::Debug)
 }
 
@@ -239,7 +269,7 @@ pub fn init() -> Handle {
 /// ```
 /// logger_init::init();
 /// ```
-pub fn init() -> Handle {
+pub fn init() {
     use log::LevelFilter::*;
 
     let logging_level = match env::var("LOGGING_LEVEL_THRESHOLD") {
