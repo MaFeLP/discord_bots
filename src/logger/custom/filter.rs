@@ -1,3 +1,12 @@
+//!
+//! This module contains all custom logging filters. A filter examines a record which is to be
+//! logged and then  decides, if it should be logged or not.
+//!
+//! Current filters available:
+//!
+//! * [UpperThresholdFilter]
+//!
+
 use log::{LevelFilter, Record};
 use log4rs::filter::{Filter, Response};
 
@@ -13,12 +22,29 @@ pub struct UpperThresholdFilter {
 
 impl UpperThresholdFilter {
     /// Creates a new `ThresholdFilter` with the specified maximum logging
+    ///
+    /// # Arguments
+    ///
+    /// * `level`: The level **above** which this filter should reject the log messages.
+    ///
+    /// returns: UpperThresholdFilter
+    ///
+    /// # Examples
+    /// * See [logger::default_logger](crate::logger::default_logger), line 139 for a detailed
+    ///   example.
     pub fn new(level: LevelFilter) -> UpperThresholdFilter {
         UpperThresholdFilter { level }
     }
 }
 
 impl Filter for UpperThresholdFilter {
+    /// The filter function which holds the logic, whether the record should be rejected.
+    ///
+    /// # Arguments
+    ///
+    /// * `record`: The log record which is tested for rejection.
+    ///
+    /// returns: Response
     fn filter(&self, record: &Record) -> Response {
         // Changed from `>` to `<`.
         if record.level() < self.level {

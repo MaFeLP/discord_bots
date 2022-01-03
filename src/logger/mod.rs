@@ -1,3 +1,23 @@
+//!
+//! The logging module which handles all the configuration of
+//! the [log4rs] instance for this program.
+//!
+//! After calling its [init] methods, the program then can use
+//! [log]'s macros to log entries to three different outputs:
+//!
+//! 1. Everything is logged into a log file, located by default
+//!    at `logs/latest.log`.
+//! 2. Depending on the log level, the response is also logged to stdout or stderr:
+//!     * All logs above or at level of `WARN`, will **always** be logged to stderr.
+//!     * All logs below `WARN` will be logged to stdout. This can be configured on
+//!       release builds with the `LOGGING_LEVEL_THRESHOLD` environment variable.
+//!
+//! The logger's default pattern is:
+//! ```log
+//! YYYY-mm-dd HH:MM:SS [Module/LEVEL]: Message
+//! ```
+//!
+
 use crate::logger::custom::{
     filter::UpperThresholdFilter,
     trigger::{CustomTrigger, LOG_FILE_EXISTS},
