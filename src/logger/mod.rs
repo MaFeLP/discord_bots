@@ -66,7 +66,7 @@ fn default_logger(level: log::LevelFilter) -> Handle {
             warnings.push(format!("Logging pattern has been overridden to: {}", s));
             s
         }
-        Err(_) => String::from("{h({d(%Y-%m-%d %H:%M:%S)} [{t}/{l}]: {m:>10.15}{n})}"), // Default
+        Err(_) => String::from("{h({d(%Y-%m-%d %H:%M:%S)} [{t}/{l}]: {m:>10}{n})}"), // Default
     };
     // Rollover Size
     let rollover_size = match env::var("LOGGING_ROLLOVER_SIZE") {
