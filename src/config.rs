@@ -15,8 +15,9 @@ use toml::value;
 const PANIC_RESPONSE: &str = "Please create a config file yourself or try setting the environment CONFIG_FILE to valid file location!";
 
 /// The versions of the config this program is compatible with
-const COMPATIBLE_VERSIONS: [(u32, u32); 1] = [
+const COMPATIBLE_VERSIONS: [(u32, u32); 2] = [
     (0, 2),
+    (0, 3),
 ];
 
 lazy_static! {
