@@ -6,7 +6,6 @@
 //!
 
 use log4rs::append::rolling_file::{policy::compound::trigger::Trigger, LogFile};
-use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 /// A trigger which rolls the log once it has passed a certain size
