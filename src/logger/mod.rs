@@ -39,6 +39,7 @@ use log4rs::{
 };
 use std::path::Path;
 use std::{env, fs};
+use std::sync::atomic::Ordering;
 
 mod custom;
 
@@ -178,8 +179,7 @@ fn default_logger(level: log::LevelFilter) {
     let log_file_path = format!("{}/latest.log", folder);
     if Path::new(&log_file_path).exists() {
         // If it exists, roll over before first log entry.
-        let mut log_file_exists = LOG_FILE_EXISTS.lock().unwrap();
-        *log_file_exists = true;
+        LOG_FILE_EXISTS.store(true, Ordering::Relaxed);
     }
     let logfile = RollingFileAppender::builder()
         .append(true)

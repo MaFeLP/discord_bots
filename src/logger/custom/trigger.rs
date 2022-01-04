@@ -7,6 +7,7 @@
 
 use log4rs::append::rolling_file::{policy::compound::trigger::Trigger, LogFile};
 use std::sync::{Arc, Mutex};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 /// A trigger which rolls the log once it has passed a certain size
 /// or the global static `LOG_FILE_EXISTS` is `true`.
@@ -41,7 +42,7 @@ lazy_static!(
     /// It is set, by [default_logger](crate::logger::default_logger) before the configuration
     /// is constructed. It **should only be unset by [CustomTrigger::trigger]**, when the logfile
     /// has been rolled over **ONCE** at program startup!
-    pub static ref LOG_FILE_EXISTS: Mutex<bool> = Mutex::new(false);
+    pub static ref LOG_FILE_EXISTS: AtomicBool = AtomicBool::new(false);
 );
 
 impl Trigger for CustomTrigger {
@@ -58,11 +59,11 @@ impl Trigger for CustomTrigger {
     ///
     /// returns: Result<bool, Error>
     fn trigger(&self, logfile: &LogFile) -> anyhow::Result<bool> {
-        let mut log_file_exists = LOG_FILE_EXISTS.lock().unwrap();
-        let roll: bool = (logfile.len_estimate() > self.limit) || *log_file_exists;
+        let log_file_exists = LOG_FILE_EXISTS.load(Ordering::Relaxed);
+        let roll: bool = (logfile.len_estimate() > self.limit) || log_file_exists;
 
-        if *log_file_exists {
-            *log_file_exists = false;
+        if log_file_exists {
+            LOG_FILE_EXISTS.store(false, Ordering::Relaxed);
         }
 
         Ok(roll)
