@@ -1,6 +1,6 @@
 //!
 //! This module contains all custom logging filters. A filter examines a record which is to be
-//! logged and then  decides, if it should be logged or not.
+//! logged and then decides, if it should be logged or not.
 //!
 //! Current filters available:
 //!
