@@ -13,7 +13,7 @@ use std::{
     process::exit,
     thread::sleep,
     time::Duration,
-    sync::{Arc},
+    sync::{Arc, atomic::Ordering},
 };
 use log::{debug, error, info, trace, warn};
 use serenity::prelude::*;
@@ -107,6 +107,11 @@ async fn start_kg() {
 /// Main entry point to this program
 fn main() {
     logger::init();
+
+    // Clears the old log file, so that the first log entry is the log afterwards
+    if logger::custom::trigger::LOG_FILE_EXISTS.load(Ordering::Relaxed) {
+        info!("Starting new instance in another log file.");
+    }
 
     info!("Running discord_bots version {}{}",
         env!("CARGO_PKG_VERSION"),

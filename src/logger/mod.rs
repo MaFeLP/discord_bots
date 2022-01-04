@@ -41,7 +41,7 @@ use std::path::Path;
 use std::{env, fs};
 use std::sync::atomic::Ordering;
 
-mod custom;
+pub mod custom;
 
 /// A function that initializes the global logger.
 ///
