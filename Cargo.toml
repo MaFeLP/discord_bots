@@ -1,6 +1,6 @@
 [package]
 name = "xd_bot"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["MaFeLP <mafelp@protonmail.ch>"]
 edition = "2021"
 description = "A small collection of non-useful commenting bots"
@@ -10,7 +10,7 @@ repository = "https://github.com/MaFeLP/xd_bot/"
 license = "GPLv3"
 keywords = ["discord", "bot", "serenity"]
 categories = ["discord"]
-exclude = [".env", "config.toml"]
+exclude = [".env", "config.toml", "log4rs.yml"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -22,6 +22,9 @@ lazy_static = "1.4"
 toml = "0.5"
 serde = { version = "1.0", features = ["derive"] }
 rand = "0.8.1"
+log = "0.4.14"
+log4rs = { version = "1.0.0", features = ["gzip", "rolling_file_appender", "fixed_window_roller", "yaml_format"] }
+anyhow = "1.0.52"
 
 [dependencies.serenity]
 default-features = false

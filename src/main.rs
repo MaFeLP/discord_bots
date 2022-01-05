@@ -5,6 +5,7 @@ mod kaenguru;
 mod xd;
 mod config;
 mod replies;
+mod logger;
 
 use std::{
     borrow::Borrow,
@@ -12,8 +13,9 @@ use std::{
     process::exit,
     thread::sleep,
     time::Duration,
-    sync::{Arc},
+    sync::{Arc, atomic::Ordering},
 };
+use log::{debug, error, info, trace, warn};
 use serenity::prelude::*;
 use tokio::{
     runtime::Runtime,
@@ -35,7 +37,7 @@ async fn start_xd() {
                     match &config.autokommentator.token {
                         Some(s) => String::from(s),
                         None => {
-                            println!("No token configured for the autokommentator");
+                            warn!("No token configured for the autokommentator");
                             return
                         }
                     }
@@ -45,18 +47,18 @@ async fn start_xd() {
                 }
             };
 
-            dbg!("Token is: {}", &token);
+            trace!("Token is: {}", &token);
             token
         }
     };
     let mut xd_client = Client::builder(xd_token)
         .event_handler(xd::XDHandler)
         .await
-        .expect("[XD]:\tError creating client");
+        .expect("Error creating client");
 
     if let Err(why) = xd_client.start().await {
-        println!(
-            "[KG]:\tAn error occurred while running the client: {:?}",
+        error!(
+            "An error occurred while running the client: {:?}",
             why
         )
     }
@@ -75,7 +77,7 @@ async fn start_kg() {
                     match &config.kaenguru.token {
                         Some(s) => String::from(s),
                         None => {
-                            println!("No token configured for the Kaenguru");
+                            warn!("No token configured for the Kaenguru");
                             return
                         }
                     }
@@ -85,18 +87,18 @@ async fn start_kg() {
                 }
             };
 
-            dbg!("Token is: {}", &token);
+            trace!("Token is: {}", &token);
             token
         }
     };
     let mut kg_client = Client::builder(kg_token)
         .event_handler(kaenguru::KaenguruHandler)
         .await
-        .expect("[KG]:\tError creating client");
+        .expect("Error creating client");
 
     if let Err(why) = kg_client.start().await {
-        println!(
-            "[KG]:\tAn error occurred while running the client: {:?}",
+        error!(
+            "An error occurred while running the client: {:?}",
             why
         )
     }
@@ -104,21 +106,40 @@ async fn start_kg() {
 
 /// Main entry point to this program
 fn main() {
-    println!("[MAIN]:\tStarting \"Känguru Rechenkencht\" and \"XD-Bot\"...");
+    logger::init();
+
+    // Clears the old log file, so that the first log entry is the log afterwards
+    if logger::custom::trigger::LOG_FILE_EXISTS.load(Ordering::Relaxed) {
+        info!("Starting new instance in another log file.");
+    }
+
+    info!("Running discord_bots version {}{}",
+        env!("CARGO_PKG_VERSION"),
+        {
+            // Only print the git hash, if it is not empty.
+            if env!("GIT_HASH").eq_ignore_ascii_case("") {
+                String::new()
+            } else {
+                format!(" (git ref: {})", env!("GIT_HASH"))
+            }
+        }
+    );
+    info!("Starting \"Känguru Rechenkencht\" and \"XD-Bot\"...");
     // Use tokio to run multiple bots at the same time
     let start = Instant::now();
     let rt = Runtime::new().unwrap();
     rt.block_on(async move {
         tokio::spawn(async { start_xd().await });
-        println!("[ASYN]:\tStarted \"XD-Bot\"!");
+        info!("Started \"XD-Bot\"!");
         tokio::spawn(async { start_kg().await });
-        println!("[ASYN]:\tStarted \"Känguru Rechenknecht\"!");
+        info!("Started \"Känguru Rechenknecht\"!");
     });
-    println!("[MAIN]:\tStarted two bots.\n[MAIN]:\tThey should appear in you list shortly!");
+    info!("Started two bots.");
+    info!("They should appear in you list shortly!");
 
     // Set what happens when Ctrl+C or SIGINT is sent to this progess
     ctrlc::set_handler(move || {
-        println!("\n[MAIN]: Received Shutdown Signal.");
+        debug!("Received Shutdown Signal.");
 
         // Calculate how long this program ran.
         let elapsed_seconds = &start.elapsed().as_secs();
@@ -140,7 +161,9 @@ fn main() {
             s_seconds = String::from("0");
             s_seconds.push_str(seconds.to_string().borrow());
         }
-        println!("[MAIN]: Ran for {}:{}:{}", s_hours, s_minutes, s_seconds);
+        info!("Ran for {}:{}:{}", s_hours, s_minutes, s_seconds);
+        info!("Thanks for using these bots! If you like them, consider staring this repo on GitHub:");
+        info!("    https://github.com/MaFeLP/discord_bots");
         exit(0);
     })
     .expect("Error setting Ctrl-C handler");
