@@ -1627,7 +1627,6 @@ version = "0.3.0"
 dependencies = [
  "anyhow",
  "ctrlc",
- "lazy_static",
  "log",
  "log4rs",
  "once_cell",
