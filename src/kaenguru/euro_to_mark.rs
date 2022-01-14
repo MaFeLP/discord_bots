@@ -1,4 +1,3 @@
-use regex::Regex;
 use crate::regex;
 
 /// The errors that can occur in the
@@ -35,16 +34,16 @@ pub enum Error {
 /// };
 /// ```
 pub fn get_euro(message: &str) -> Result<u64, Error> {
-    /// The regular expression used to parse the message into correctly formatted euro amounts
-    ///
-    /// # Examples
-    ///
-    /// * 99,10 € -> 99
-    /// * 98923 € -> 98923
-    /// * 91.897 € -> 91897
-    /// * 99,10 EUR -> 99
-    /// * 98923 EUR -> 98923
-    /// * 91.897 EUR -> 91897
+    // The regular expression used to parse the message into correctly formatted euro amounts
+    //
+    // # Examples
+    //
+    // * 99,10 € -> 99
+    // * 98923 € -> 98923
+    // * 91.897 € -> 91897
+    // * 99,10 EUR -> 99
+    // * 98923 EUR -> 98923
+    // * 91.897 EUR -> 91897
     let result = regex!(r"(?is)(?:\d\.?)*\d(?:,\d+)? ?(?:EUR|€)").find_iter(message).last();
     if result == None {
         return Err(Error::InvalidInput);

@@ -4,11 +4,10 @@ use std::{
     path::Path,
     io::Write,
     process::exit,
-    sync::{Arc, Mutex},
+    sync::Mutex,
 };
 use log::{debug, error, info, trace, warn};
 use once_cell::sync::Lazy;
-use regex::Regex;
 use serde::Deserialize;
 use toml::value;
 use crate::regex;

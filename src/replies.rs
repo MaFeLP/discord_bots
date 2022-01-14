@@ -1,6 +1,3 @@
-use std::{
-    sync::Arc,
-};
 use log::{debug, error, info, trace};
 use rand::Rng;
 use serenity::{

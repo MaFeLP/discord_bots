@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate lazy_static;
-
 mod kaenguru;
 mod xd;
 mod config;
@@ -14,7 +11,7 @@ use std::{
     process::exit,
     thread::sleep,
     time::Duration,
-    sync::{Arc, atomic::Ordering},
+    sync::atomic::Ordering,
 };
 use log::{debug, error, info, trace, warn};
 use serenity::prelude::*;
