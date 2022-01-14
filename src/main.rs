@@ -6,6 +6,7 @@ mod xd;
 mod config;
 mod replies;
 mod logger;
+mod common;
 
 use std::{
     borrow::Borrow,
