@@ -54,9 +54,7 @@ pub enum ReplyError {
 pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result<String, ReplyError> {
     trace!("Getting replies from configuration...");
     let replies: Vec<Response> = {
-        let config_arc = Arc::clone(&CONFIG);
-        let config_lock = config_arc.lock();
-        let reply_vector: Vec<Response> = match config_lock {
+        let reply_vector: Vec<Response> = match CONFIG.lock() {
             Ok(config) => {
                 // Copy replies vector
                 match bot {

@@ -7,6 +7,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 use log::{debug, error, info, trace, warn};
+use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::Deserialize;
 use toml::value;
@@ -21,27 +22,23 @@ const COMPATIBLE_VERSIONS: [(u32, u32); 2] = [
     (0, 3),
 ];
 
-lazy_static! {
-    ///
-    /// The global, thread safe configuration of all of this bot.
-    ///
-    /// Examples:
-    /// ```
-    /// let config_arc = Arc::clone(&CONFIG);
-    /// let mut config_lock = config_arc.lock();
-    /// let value = match config_lock {
-    ///     Ok(config) => {
-    ///         // ACCESS CONFIG FIELDS HERE AND COPY THEM INTO VALUE
-    ///         // Example: String::from(&config.autokommentator.token)
-    ///     },
-    ///     Err(why) => {
-    ///         panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
-    ///     }
-    /// };
-    /// ```
-    ///
-    pub static ref CONFIG: Arc<Mutex<Config>> = Arc::new(Mutex::new(Config::new()));
-}
+///
+/// The global, thread safe configuration of all of this bot.
+///
+/// Examples:
+/// ```
+/// let value = match CONFIG.lock() {
+///     Ok(config) => {
+///         // ACCESS CONFIG FIELDS HERE AND COPY THEM INTO VALUE
+///         // Example: String::from(&config.autokommentator.token)
+///     },
+///     Err(why) => {
+///         panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
+///     }
+/// };
+/// ```
+///
+pub static CONFIG: Lazy<Mutex<Config>> = Lazy::new(|| Mutex::new(Config::new()));
 
 #[derive(Deserialize)]
 /// The default configuration struct that holds the global configuration structure
