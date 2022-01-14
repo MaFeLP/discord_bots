@@ -1,4 +1,5 @@
 use regex::Regex;
+use crate::regex;
 
 /// The errors that can occur in the
 pub enum Error {
@@ -6,20 +7,6 @@ pub enum Error {
     TooBig,
     /// When no number could be found in the input string
     InvalidInput,
-}
-
-lazy_static! {
-    /// The regular expression used to parse the message into correctly formatted euro amounts
-    ///
-    /// # Examples
-    ///
-    /// * 99,10 € -> 99
-    /// * 98923 € -> 98923
-    /// * 91.897 € -> 91897
-    /// * 99,10 EUR -> 99
-    /// * 98923 EUR -> 98923
-    /// * 91.897 EUR -> 91897
-    static ref PARSING: Regex = Regex::new(r"(?is)(?:\d\.?)*\d(?:,\d+)? ?(?:EUR|€)").unwrap();
 }
 
 /// Function to extract the last euro amount from a message
@@ -48,7 +35,17 @@ lazy_static! {
 /// };
 /// ```
 pub fn get_euro(message: &str) -> Result<u64, Error> {
-    let result = PARSING.find_iter(message).last();
+    /// The regular expression used to parse the message into correctly formatted euro amounts
+    ///
+    /// # Examples
+    ///
+    /// * 99,10 € -> 99
+    /// * 98923 € -> 98923
+    /// * 91.897 € -> 91897
+    /// * 99,10 EUR -> 99
+    /// * 98923 EUR -> 98923
+    /// * 91.897 EUR -> 91897
+    let result = regex!(r"(?is)(?:\d\.?)*\d(?:,\d+)? ?(?:EUR|€)").find_iter(message).last();
     if result == None {
         return Err(Error::InvalidInput);
     }

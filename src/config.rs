@@ -10,6 +10,7 @@ use log::{debug, error, info, trace, warn};
 use regex::Regex;
 use serde::Deserialize;
 use toml::value;
+use crate::regex;
 
 /// The response that is injected into a panic, if the config file was configured falsely
 const PANIC_RESPONSE: &str = "Please create a config file yourself or try setting the environment CONFIG_FILE to valid file location!";
@@ -40,8 +41,6 @@ lazy_static! {
     /// ```
     ///
     pub static ref CONFIG: Arc<Mutex<Config>> = Arc::new(Mutex::new(Config::new()));
-
-    static ref VERSION_REGEX: Regex = Regex::new("(?m)^version *= *\"(?P<version>\\d*\\.\\d*)\" *(|#.*)$").unwrap();
 }
 
 #[derive(Deserialize)]
@@ -208,7 +207,7 @@ fn make_default_config(config_file: &String) {
 fn check_version(config_content: &str) -> (bool, &str) {
     // Get the version, by searching for the config line and getting the version part of it.
     let version = {
-        let captures = match VERSION_REGEX.captures(config_content) {
+        let captures = match regex!("(?m)^version *= *\"(?P<version>\\d*\\.\\d*)\" *(|#.*)$").captures(config_content) {
             Some(c) => c,
             None => {
                 error!("Could not find a version in your config file!");
