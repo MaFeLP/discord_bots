@@ -4,12 +4,13 @@ use std::{
     path::Path,
     io::Write,
     process::exit,
-    sync::{Arc, Mutex},
+    sync::Mutex,
 };
 use log::{debug, error, info, trace, warn};
-use regex::Regex;
+use once_cell::sync::Lazy;
 use serde::Deserialize;
 use toml::value;
+use crate::regex;
 
 /// The response that is injected into a panic, if the config file was configured falsely
 const PANIC_RESPONSE: &str = "Please create a config file yourself or try setting the environment CONFIG_FILE to valid file location!";
@@ -20,29 +21,23 @@ const COMPATIBLE_VERSIONS: [(u32, u32); 2] = [
     (0, 3),
 ];
 
-lazy_static! {
-    ///
-    /// The global, thread safe configuration of all of this bot.
-    ///
-    /// Examples:
-    /// ```
-    /// let config_arc = Arc::clone(&CONFIG);
-    /// let mut config_lock = config_arc.lock();
-    /// let value = match config_lock {
-    ///     Ok(config) => {
-    ///         // ACCESS CONFIG FIELDS HERE AND COPY THEM INTO VALUE
-    ///         // Example: String::from(&config.autokommentator.token)
-    ///     },
-    ///     Err(why) => {
-    ///         panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
-    ///     }
-    /// };
-    /// ```
-    ///
-    pub static ref CONFIG: Arc<Mutex<Config>> = Arc::new(Mutex::new(Config::new()));
-
-    static ref VERSION_REGEX: Regex = Regex::new("(?m)^version *= *\"(?P<version>\\d*\\.\\d*)\" *(|#.*)$").unwrap();
-}
+///
+/// The global, thread safe configuration of all of this bot.
+///
+/// Examples:
+/// ```
+/// let value = match CONFIG.lock() {
+///     Ok(config) => {
+///         // ACCESS CONFIG FIELDS HERE AND COPY THEM INTO VALUE
+///         // Example: String::from(&config.autokommentator.token)
+///     },
+///     Err(why) => {
+///         panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
+///     }
+/// };
+/// ```
+///
+pub static CONFIG: Lazy<Mutex<Config>> = Lazy::new(|| Mutex::new(Config::new()));
 
 #[derive(Deserialize)]
 /// The default configuration struct that holds the global configuration structure
@@ -208,7 +203,7 @@ fn make_default_config(config_file: &String) {
 fn check_version(config_content: &str) -> (bool, &str) {
     // Get the version, by searching for the config line and getting the version part of it.
     let version = {
-        let captures = match VERSION_REGEX.captures(config_content) {
+        let captures = match regex!("(?m)^version *= *\"(?P<version>\\d*\\.\\d*)\" *(|#.*)$").captures(config_content) {
             Some(c) => c,
             None => {
                 error!("Could not find a version in your config file!");

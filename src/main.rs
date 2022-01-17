@@ -1,11 +1,9 @@
-#[macro_use]
-extern crate lazy_static;
-
 mod kaenguru;
 mod xd;
 mod config;
 mod replies;
 mod logger;
+mod common;
 
 use std::{
     borrow::Borrow,
@@ -13,7 +11,7 @@ use std::{
     process::exit,
     thread::sleep,
     time::Duration,
-    sync::{Arc, atomic::Ordering},
+    sync::atomic::Ordering,
 };
 use log::{debug, error, info, trace, warn};
 use serenity::prelude::*;
@@ -30,9 +28,7 @@ async fn start_xd() {
     let xd_token = match env::var("DISCORD_TOKEN_XD") {
         Ok(s) => s,
         Err(_) => {
-            let config_arc = Arc::clone(&CONFIG);
-            let config_lock = config_arc.lock();
-            let token = match config_lock {
+            let token = match CONFIG.lock() {
                 Ok(config) => {
                     match &config.autokommentator.token {
                         Some(s) => String::from(s),
@@ -70,9 +66,7 @@ async fn start_kg() {
     let kg_token = match env::var("DISCORD_TOKEN_KAENGURU") {
         Ok(s) => s,
         Err(_) => {
-            let config_arc = Arc::clone(&CONFIG);
-            let config_lock = config_arc.lock();
-            let token = match config_lock {
+            let token = match CONFIG.lock() {
                 Ok(config) => {
                     match &config.kaenguru.token {
                         Some(s) => String::from(s),

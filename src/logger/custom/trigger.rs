@@ -36,13 +36,11 @@ impl CustomTrigger {
     }
 }
 
-lazy_static!(
-    /// A global, thread-safe variable that tracks, if the logfile exists at program startup.
-    /// It is set, by [default_logger](crate::logger::default_logger) before the configuration
-    /// is constructed. It **should only be unset by [CustomTrigger::trigger]**, when the logfile
-    /// has been rolled over **ONCE** at program startup!
-    pub static ref LOG_FILE_EXISTS: AtomicBool = AtomicBool::new(false);
-);
+/// A global, thread-safe variable that tracks, if the logfile exists at program startup.
+/// It is set, by [default_logger](crate::logger::default_logger) before the configuration
+/// is constructed. It **should only be unset by [CustomTrigger::trigger]**, when the logfile
+/// has been rolled over **ONCE** at program startup!
+pub static LOG_FILE_EXISTS: AtomicBool = AtomicBool::new(false);
 
 impl Trigger for CustomTrigger {
     /// A function that checks if the log file meets the conditions for a roll-over.
