@@ -23,7 +23,7 @@ jobs:
         with:
           string: ${{ env.IMAGE_NAME }}
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup cross compilation
         run: cargo install cross
@@ -53,7 +53,7 @@ jobs:
 # When the release has been created: create docker images in the same step to save computing time
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@6af3c118c8376c675363897acf1757f7a9be6583
+        uses: docker/login-action@dd4fa0671be5250ee6f50aedf4cb05514abda2c7
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
