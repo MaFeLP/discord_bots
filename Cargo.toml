@@ -29,4 +29,4 @@ once_cell = "1.10.0"
 [dependencies.serenity]
 default-features = false
 features = ["client", "gateway", "rustls_backend", "model", "cache"]
-version = "0.10"
+version = "0.11"
