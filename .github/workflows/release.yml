@@ -77,7 +77,7 @@ jobs:
 
       # Build arm image
       - name: Build and push Docker image
-        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
+        uses: docker/build-push-action@e551b19e49efd4e98792db7592c17c09b89db8d8
         with:
           file: .github/action-assets/multi-platform.dockerfile
           context: .
@@ -92,7 +92,7 @@ jobs:
 
       # Build linux/amd64 image
       - name: Build and push Docker image
-        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
+        uses: docker/build-push-action@e551b19e49efd4e98792db7592c17c09b89db8d8
         with:
           file: .github/action-assets/multi-platform.dockerfile
           context: .
