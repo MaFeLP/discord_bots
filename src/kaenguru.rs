@@ -129,8 +129,7 @@ impl EventHandler for KaenguruHandler {
     async fn ready(&self, ctx: Context, data_about_bot: Ready) {
         info!("Logged in as {}", data_about_bot.user.name);
 
-        let permissions =
-            Permissions::READ_MESSAGES | Permissions::SEND_MESSAGES | Permissions::EMBED_LINKS;
+        let permissions = Permissions::default();
         match data_about_bot.user.invite_url(&ctx, permissions).await {
             Ok(url) => info!("Bot invitation url is: {}", url),
             Err(why) => error!("Error getting invite url: {}", why),

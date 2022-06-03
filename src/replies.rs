@@ -119,7 +119,7 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
     };
 
     // Get the channel and only react to private messages and server-messages
-    let option_channel = ctx.cache.channel(new_message.channel_id).await;
+    let option_channel = ctx.cache.channel(new_message.channel_id);
     match new_message.reply(&ctx, &response).await {
         Ok(msg) => {
             let channel_name = match option_channel {

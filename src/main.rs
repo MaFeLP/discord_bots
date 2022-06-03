@@ -47,7 +47,7 @@ async fn start_xd() {
             token
         }
     };
-    let mut xd_client = Client::builder(xd_token)
+    let mut xd_client = Client::builder(xd_token, GatewayIntents::default())
         .event_handler(xd::XDHandler)
         .await
         .expect("Error creating client");
@@ -85,7 +85,7 @@ async fn start_kg() {
             token
         }
     };
-    let mut kg_client = Client::builder(kg_token)
+    let mut kg_client = Client::builder(kg_token, GatewayIntents::default())
         .event_handler(kaenguru::KaenguruHandler)
         .await
         .expect("Error creating client");
