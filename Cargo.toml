@@ -17,7 +17,7 @@ exclude = [".env", "config.toml", "log4rs.yml"]
 [dependencies]
 tokio = { version = "1.16", features = ["macros", "rt-multi-thread"] }
 ctrlc = "3.2"
-regex = "1.5"
+regex = "1.6"
 toml = "0.5"
 serde = { version = "1.0", features = ["derive"] }
 rand = "0.8.5"
