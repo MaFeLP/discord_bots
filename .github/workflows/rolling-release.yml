@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Make Repository name lowercase
         id: name
-        uses: ASzc/change-string-case-action@v3
+        uses: ASzc/change-string-case-action@v4
         with:
           string: ${{ env.IMAGE_NAME }}
 
