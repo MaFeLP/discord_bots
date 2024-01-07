@@ -24,14 +24,14 @@ jobs:
           string: ${{ env.IMAGE_NAME }}
 
       - uses: actions/checkout@v4
-      
+
       - name: Extract tag name
         id: tag_name
-        run: echo ::set-output name=NAME::$(echo ${{ github.ref }} | cut -d / -f 3)
+        run: echo NAME=$(echo ${{ github.ref }} | cut -d / -f 3) >> ${{ GITHUB_OUTPUT }}
 
       - name: Setup cross compilation
         run: cargo install cross
-          
+
       - name: Build cross platform
         run: |
           mkdir /tmp/release-files
