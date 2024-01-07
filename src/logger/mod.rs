@@ -38,8 +38,8 @@ use log4rs::{
     Config,
 };
 use std::path::Path;
-use std::{env, fs};
 use std::sync::atomic::Ordering;
+use std::{env, fs};
 
 pub mod custom;
 
@@ -166,10 +166,7 @@ fn default_logger(level: log::LevelFilter) {
             ),
             Box::new(
                 FixedWindowRoller::builder()
-                    .build(
-                        &format!("{}/{}", folder, archive_pattern),
-                        log_file_count,
-                    )
+                    .build(&format!("{}/{}", folder, archive_pattern), log_file_count)
                     .unwrap(),
             ),
         )

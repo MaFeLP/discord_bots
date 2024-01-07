@@ -1,25 +1,22 @@
-use std::{
-    fs::{self, File},
-    env,
-    path::Path,
-    io::Write,
-    process::exit,
-    sync::Mutex,
-};
+use crate::regex;
 use log::{debug, error, info, trace, warn};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
+use std::{
+    env,
+    fs::{self, File},
+    io::Write,
+    path::Path,
+    process::exit,
+    sync::Mutex,
+};
 use toml::value;
-use crate::regex;
 
 /// The response that is injected into a panic, if the config file was configured falsely
 const PANIC_RESPONSE: &str = "Please create a config file yourself or try setting the environment CONFIG_FILE to valid file location!";
 
 /// The versions of the config this program is compatible with
-const COMPATIBLE_VERSIONS: [(u32, u32); 2] = [
-    (0, 2),
-    (0, 3),
-];
+const COMPATIBLE_VERSIONS: [(u32, u32); 2] = [(0, 2), (0, 3)];
 
 ///
 /// The global, thread safe configuration of all of this bot.
@@ -56,7 +53,7 @@ pub struct Kaenguru {
     /// The token that is used to log into discord
     pub token: Option<String>,
     /// The replies and messages that this bot should react to.
-    pub responses: Vec<Response>
+    pub responses: Vec<Response>,
 }
 
 #[derive(Deserialize)]
@@ -65,7 +62,7 @@ pub struct Autokommentator {
     /// The token that is used to log into discord
     pub token: Option<String>,
     /// The replies and messages that this bot should react to.
-    pub responses: Vec<Response>
+    pub responses: Vec<Response>,
 }
 
 #[derive(Deserialize)]
@@ -82,7 +79,7 @@ impl Clone for Response {
     fn clone(&self) -> Self {
         Response {
             trigger: self.trigger.to_vec(),
-            response_pool: self.response_pool.to_vec()
+            response_pool: self.response_pool.to_vec(),
         }
     }
 }
@@ -101,15 +98,14 @@ impl Config {
             Ok(o) => {
                 warn!("Config file location has been overridden to: \"{}\"", o);
                 o
-            },
+            }
             Err(_) => {
                 debug!("Config file location has not changed. Using default \"config.toml\"...");
                 "config.toml".to_string()
             }
-
         };
 
-        if ! Path::new(&config_file).exists() {
+        if !Path::new(&config_file).exists() {
             warn!("Could not locate Configuration file! Using defaults!");
 
             make_default_config(&config_file);
@@ -117,7 +113,7 @@ impl Config {
 
         let config_content = match fs::read_to_string(&config_file) {
             Err(_) => panic!("Could not load configuration file contents!"),
-            Ok(s) => s
+            Ok(s) => s,
         };
         debug!("Configuration has been loaded!");
         trace!("Contents:\n{}", config_content);
@@ -125,7 +121,7 @@ impl Config {
         info!("Checking version of the configuration...");
         {
             let (compatible, version) = check_version(&config_content);
-            if ! compatible {
+            if !compatible {
                 error!("The config file version ({}) is not compatible with your program version ({}.{})!\nPlease inspect the Changelog (https://github.com/MaFeLP/discord_bots/releases) and see how to change the config file accordingly!",
                           version,
                           env!("CARGO_PKG_VERSION_MAJOR"),
@@ -144,7 +140,7 @@ impl Config {
                 error!("Configuration file invalid!");
                 error!("An example can be found here: {}", example_config_file);
                 exit(1);
-            },
+            }
             Ok(config) => config,
         };
         info!("Configuration now usable!");
@@ -173,14 +169,24 @@ fn make_default_config(config_file: &String) {
     // Try to create the file
     let mut file = match File::create(config_file) {
         Ok(f) => f,
-        Err(why) => panic!("Could not create the config file: {:?}.\n{}\n{}", why, PANIC_RESPONSE, why)
+        Err(why) => panic!(
+            "Could not create the config file: {:?}.\n{}\n{}",
+            why, PANIC_RESPONSE, why
+        ),
     };
 
     trace!("Writing defaults to file...");
     // Write the config file
-    match writeln!(&mut file, "# Config created automatically\n{}", include_str!("../config.toml.example")) {
+    match writeln!(
+        &mut file,
+        "# Config created automatically\n{}",
+        include_str!("../config.toml.example")
+    ) {
         Ok(_) => println!("Written default configuration to {}", config_file),
-        Err(why) => panic!("Could not write default configuration file to {}: {:?}\n{}\n{}", config_file, why, PANIC_RESPONSE, why)
+        Err(why) => panic!(
+            "Could not write default configuration file to {}: {:?}\n{}\n{}",
+            config_file, why, PANIC_RESPONSE, why
+        ),
     };
     debug!("Default configuration has been created!");
 }
@@ -203,7 +209,9 @@ fn make_default_config(config_file: &String) {
 fn check_version(config_content: &str) -> (bool, &str) {
     // Get the version, by searching for the config line and getting the version part of it.
     let version = {
-        let captures = match regex!("(?m)^version *= *\"(?P<version>\\d*\\.\\d*)\" *(|#.*)$").captures(config_content) {
+        let captures = match regex!("(?m)^version *= *\"(?P<version>\\d*\\.\\d*)\" *(|#.*)$")
+            .captures(config_content)
+        {
             Some(c) => c,
             None => {
                 error!("Could not find a version in your config file!");
@@ -216,10 +224,16 @@ fn check_version(config_content: &str) -> (bool, &str) {
         out
     };
     // Config file is always compatible with its associated program version
-    if format!("{}.{}", env!("CARGO_PKG_VERSION_MAJOR"), env!("CARGO_PKG_VERSION_MINOR")).eq_ignore_ascii_case(version) {
-        debug!("Config file version ({}) is the same as program version ({}). Result: Compatible",
-            version,
-            version
+    if format!(
+        "{}.{}",
+        env!("CARGO_PKG_VERSION_MAJOR"),
+        env!("CARGO_PKG_VERSION_MINOR")
+    )
+    .eq_ignore_ascii_case(version)
+    {
+        debug!(
+            "Config file version ({}) is the same as program version ({}). Result: Compatible",
+            version, version
         );
         return (true, version);
     }

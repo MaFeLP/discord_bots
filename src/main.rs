@@ -1,24 +1,16 @@
-mod kaenguru;
-mod xd;
-mod config;
-mod replies;
-mod logger;
 mod common;
+mod config;
+mod kaenguru;
+mod logger;
+mod replies;
+mod xd;
 
-use std::{
-    borrow::Borrow,
-    env,
-    process::exit,
-    thread::sleep,
-    time::Duration,
-    sync::atomic::Ordering,
-};
 use log::{debug, error, info, trace, warn};
 use serenity::prelude::*;
-use tokio::{
-    runtime::Runtime,
-    time::Instant,
+use std::{
+    borrow::Borrow, env, process::exit, sync::atomic::Ordering, thread::sleep, time::Duration,
 };
+use tokio::{runtime::Runtime, time::Instant};
 
 use crate::config::CONFIG;
 
@@ -29,17 +21,18 @@ async fn start_xd() {
         Ok(s) => s,
         Err(_) => {
             let token = match CONFIG.lock() {
-                Ok(config) => {
-                    match &config.autokommentator.token {
-                        Some(s) => String::from(s),
-                        None => {
-                            warn!("No token configured for the autokommentator");
-                            return
-                        }
+                Ok(config) => match &config.autokommentator.token {
+                    Some(s) => String::from(s),
+                    None => {
+                        warn!("No token configured for the autokommentator");
+                        return;
                     }
                 },
                 Err(why) => {
-                    panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
+                    panic!(
+                        "Something went wrong internally: {:?}\nMutex is poisoned: {}",
+                        why, why
+                    );
                 }
             };
 
@@ -53,10 +46,7 @@ async fn start_xd() {
         .expect("Error creating client");
 
     if let Err(why) = xd_client.start().await {
-        error!(
-            "An error occurred while running the client: {:?}",
-            why
-        )
+        error!("An error occurred while running the client: {:?}", why)
     }
 }
 
@@ -67,17 +57,18 @@ async fn start_kg() {
         Ok(s) => s,
         Err(_) => {
             let token = match CONFIG.lock() {
-                Ok(config) => {
-                    match &config.kaenguru.token {
-                        Some(s) => String::from(s),
-                        None => {
-                            warn!("No token configured for the Kaenguru");
-                            return
-                        }
+                Ok(config) => match &config.kaenguru.token {
+                    Some(s) => String::from(s),
+                    None => {
+                        warn!("No token configured for the Kaenguru");
+                        return;
                     }
                 },
                 Err(why) => {
-                    panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
+                    panic!(
+                        "Something went wrong internally: {:?}\nMutex is poisoned: {}",
+                        why, why
+                    );
                 }
             };
 
@@ -91,10 +82,7 @@ async fn start_kg() {
         .expect("Error creating client");
 
     if let Err(why) = kg_client.start().await {
-        error!(
-            "An error occurred while running the client: {:?}",
-            why
-        )
+        error!("An error occurred while running the client: {:?}", why)
     }
 }
 
@@ -107,7 +95,8 @@ fn main() {
         info!("Starting new instance in another log file.");
     }
 
-    info!("Running discord_bots version {}{}",
+    info!(
+        "Running discord_bots version {}{}",
         env!("CARGO_PKG_VERSION"),
         {
             // Only print the git hash, if it is not empty.
@@ -156,7 +145,9 @@ fn main() {
             s_seconds.push_str(seconds.to_string().borrow());
         }
         info!("Ran for {}:{}:{}", s_hours, s_minutes, s_seconds);
-        info!("Thanks for using these bots! If you like them, consider staring this repo on GitHub:");
+        info!(
+            "Thanks for using these bots! If you like them, consider staring this repo on GitHub:"
+        );
         info!("    https://github.com/MaFeLP/discord_bots");
         exit(0);
     })

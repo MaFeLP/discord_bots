@@ -1,15 +1,11 @@
-use log::{error, info};
-use serenity::{
-    async_trait,
-    model::{
-        channel::Message,
-        gateway::Ready,
-        Permissions,
-    },
-    prelude::*,
-};
 use crate::config::Bots;
 use crate::replies::reply_to;
+use log::info;
+use serenity::{
+    async_trait,
+    model::{channel::Message, gateway::Ready},
+    prelude::*,
+};
 
 /// The default struct on which the bot is built
 pub struct XDHandler;
@@ -41,13 +37,14 @@ impl EventHandler for XDHandler {
     /// * `_data_about_bot`: Some normal data about the newly created instance
     ///
     /// returns: ()
-    async fn ready(&self, ctx: Context, data_about_bot: Ready) {
+    async fn ready(&self, _ctx: Context, data_about_bot: Ready) {
         info!("Logged in as {}", data_about_bot.user.name);
 
-        let permissions = Permissions::default();
-        match data_about_bot.user.invite_url(&ctx, permissions).await {
-            Ok(url) => info!("Bot invitation url is: {}", url),
-            Err(why) => error!("Error getting invite url: {}", why),
-        };
+        //TODO create invite links
+        //        let permissions = Permissions::default();
+        //        match data_about_bot.user.invite_url(&ctx, permissions).await {
+        //            Ok(url) => info!("Bot invitation url is: {}", url),
+        //            Err(why) => error!("Error getting invite url: {}", why),
+        //        };
     }
 }

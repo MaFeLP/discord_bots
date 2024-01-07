@@ -44,7 +44,9 @@ pub fn get_euro(message: &str) -> Result<u64, Error> {
     // * 99,10 EUR -> 99
     // * 98923 EUR -> 98923
     // * 91.897 EUR -> 91897
-    let result = regex!(r"(?is)(?:\d\.?)*\d(?:,\d+)? ?(?:EUR|€)").find_iter(message).last();
+    let result = regex!(r"(?is)(?:\d\.?)*\d(?:,\d+)? ?(?:EUR|€)")
+        .find_iter(message)
+        .last();
     if result == None {
         return Err(Error::InvalidInput);
     }
@@ -53,7 +55,7 @@ pub fn get_euro(message: &str) -> Result<u64, Error> {
 
     for c in result.chars() {
         if c == '.' {
-            continue
+            continue;
         } else if c.is_digit(10) {
             number = number * 10 + c.to_digit(10).unwrap() as u64;
             if number > 100000 {

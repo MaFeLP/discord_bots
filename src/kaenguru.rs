@@ -1,15 +1,15 @@
 mod euro_to_mark;
 
-use log::{debug, error, info, trace};
-use serenity::{
-    async_trait,
-    model::{channel::Message, gateway::Ready, Permissions},
-    prelude::*,
-};
-use serenity::utils::Color;
 use crate::config::Bots;
 use crate::kaenguru::euro_to_mark::get_euro;
 use crate::replies::reply_to;
+use log::{debug, error, info, trace};
+use serenity::{
+    async_trait,
+    builder::{CreateAllowedMentions, CreateEmbed, CreateEmbedFooter, CreateMessage},
+    model::{channel::Message, gateway::Ready, prelude::*},
+    prelude::*,
+};
 
 /// The default struct on which the bot is built
 pub struct KaenguruHandler;
@@ -48,9 +48,7 @@ impl EventHandler for KaenguruHandler {
                 }
                 let description = match number > 100_000 {
                     // If the number is bigger than 100,000 send an "Error" message
-                    true => format!(
-                        "Huiuiui! So viele Schulden kann die DDR doch nicht haben!"
-                    ),
+                    true => format!("Huiuiui! So viele Schulden kann die DDR doch nicht haben!"),
                     // If the number is smaller than 100,000 send a computed message.
                     false => {
                         // If the number is also smaller than 10, append "Kleinvieh macht auch
@@ -74,41 +72,35 @@ impl EventHandler for KaenguruHandler {
                     }
                 };
 
+                let mut embed = CreateEmbed::new()
+                    // TODO add Author to the bot instance
+                    // Set the description of the description of above
+                    .description(&description)
+                    // Set the footer to "War ich ein guter Rechenknecht"?
+                    .footer(CreateEmbedFooter::new("War ich ein guter Rechenknecht?"));
+                // change the color to red if the number is bigger than 100,000
+                if number > 100_000 {
+                    embed = embed.color(Color::from_rgb(255, 0, 0));
+                }
+
                 // Send a reply message as an embed
                 match new_message
                     .channel_id
-                    .send_message(&ctx.http, |m| {
-                        m.embed(|e| {
-                            // TODO add Author to the bot instance
-                            // Set the description of the description of above
-                            e.description(&description);
-                            // Set the footer to "War ich ein guter Rechenknecht"?
-                            e.footer(|f| {
-                                f.text("War ich ein guter Rechenknecht?");
-                                f
-                            });
-                            // change the color to red if the number is bigger than 100,000
-                            if number > 100_000 {
-                                e.color(Color::from_rgb(255, 0, 0));
-                            }
-
-                            e
-                        });
-                        // References the original message
-                        m.reference_message(&new_message);
-                        m.allowed_mentions(|f| {
+                    .send_message(
+                        &ctx.http,
+                        CreateMessage::new()
+                            .embed(embed)
+                            // References the original message
+                            .reference_message(&new_message)
                             // Need to set this to false, because it would otherwise change the message
                             // background yellow (for the user who wrote it).
-                            f.replied_user(false);
-                            f
-                        });
-
-                        m
-                    })
+                            .allowed_mentions(CreateAllowedMentions::new().replied_user(false)),
+                    )
                     .await
                 {
                     // TODO add channel name (utils::get_channel function)
-                    Ok(msg) => info!("Sending \"{}\" + embed to {}",
+                    Ok(msg) => info!(
+                        "Sending \"{}\" + embed to {}",
                         description.replace("\n", "\\n"),
                         msg.channel_id
                     ),
@@ -126,13 +118,14 @@ impl EventHandler for KaenguruHandler {
     /// * `_data_about_bot`: Some normal data about the newly created instance
     ///
     /// returns: ()
-    async fn ready(&self, ctx: Context, data_about_bot: Ready) {
+    async fn ready(&self, _ctx: Context, data_about_bot: Ready) {
         info!("Logged in as {}", data_about_bot.user.name);
 
-        let permissions = Permissions::default();
-        match data_about_bot.user.invite_url(&ctx, permissions).await {
-            Ok(url) => info!("Bot invitation url is: {}", url),
-            Err(why) => error!("Error getting invite url: {}", why),
-        };
+        //TODO log invite links
+        //        let permissions = Permissions::default();
+        //        match data_about_bot.user.invite_url(&ctx, permissions).await {
+        //            Ok(url) => info!("Bot invitation url is: {}", url),
+        //            Err(why) => error!("Error getting invite url: {}", why),
+        //        };
     }
 }

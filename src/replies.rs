@@ -1,12 +1,11 @@
+use crate::config::{Bots, Response, CONFIG};
 use log::{debug, error, info, trace};
 use rand::Rng;
 use serenity::{
-    Error, model::{
-        channel::{Channel, Message},
-    },
+    model::channel::{Channel, Message},
     prelude::*,
+    Error,
 };
-use crate::config::{Response, CONFIG, Bots};
 
 /// The Errors that might be thrown by [reply_to]
 pub enum ReplyError {
@@ -14,6 +13,7 @@ pub enum ReplyError {
     /// Can be ignored in most cases.
     NoReplyFound,
     Sending(Error),
+    ChannelError(Error),
 }
 
 /// A function that searches _new\_message_ for replies configured in config.toml.
@@ -48,7 +48,11 @@ pub enum ReplyError {
 /// }
 /// ```
 ///
-pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result<String, ReplyError> {
+pub async fn reply_to(
+    ctx: &Context,
+    new_message: &Message,
+    bot: Bots,
+) -> Result<String, ReplyError> {
     trace!("Getting replies from configuration...");
     let replies: Vec<Response> = {
         let reply_vector: Vec<Response> = match CONFIG.lock() {
@@ -58,9 +62,12 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
                     Bots::Autokommentator => config.autokommentator.responses.to_vec(),
                     Bots::KaenguruKnecht => config.kaenguru.responses.to_vec(),
                 }
-            },
+            }
             Err(why) => {
-                panic!("Something went wrong internally: {:?}\nMutex is poisoned: {}", why, why);
+                panic!(
+                    "Something went wrong internally: {:?}\nMutex is poisoned: {}",
+                    why, why
+                );
             }
         };
 
@@ -87,13 +94,17 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
                     .to_lowercase()
                     .contains(&trigger.as_str().unwrap().to_lowercase())
                 {
-                    debug!("Found trigger {} in message (id: {})", trigger, new_message.id);
+                    debug!(
+                        "Found trigger {} in message (id: {})",
+                        trigger, new_message.id
+                    );
                     // Select random answer from pool
                     let mut rng = rand::thread_rng();
                     trace!("Response pool is: {:#?}", reply.response_pool);
                     let response_idx = rng.gen_range(0..reply.response_pool.len());
                     trace!("Response index is: {}", response_idx);
-                    let response_value: &toml::Value = reply.response_pool.get(response_idx).unwrap();
+                    let response_value: &toml::Value =
+                        reply.response_pool.get(response_idx).unwrap();
                     trace!("Response value is: {}", response_value.to_string());
                     out = Some(String::from(response_value.as_str().unwrap()));
 
@@ -110,23 +121,31 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
     let response = match response_option {
         None => {
             match bot {
-                Bots::Autokommentator => debug!(target: "xdbot::xd", "No trigger found in message."),
-                Bots::KaenguruKnecht => debug!(target: "xdbot::kaenguru", "No trigger found in message."),
+                Bots::Autokommentator => {
+                    debug!(target: "xdbot::xd", "No trigger found in message.")
+                }
+                Bots::KaenguruKnecht => {
+                    debug!(target: "xdbot::kaenguru", "No trigger found in message.")
+                }
             }
-            return Err(ReplyError::NoReplyFound)
-        },
+            return Err(ReplyError::NoReplyFound);
+        }
         Some(s) => s,
     };
 
     // Get the channel and only react to private messages and server-messages
-    let option_channel = ctx.cache.channel(new_message.channel_id);
+    let message_channel = new_message
+        .channel_id
+        .to_channel(&ctx)
+        .await
+        .map_err(|why| ReplyError::ChannelError(why))?;
+
     match new_message.reply(&ctx, &response).await {
         Ok(msg) => {
-            let channel_name = match option_channel {
-                Some(Channel::Private(c)) => format!("DM:{}", c.recipient.name),
-                Some(Channel::Guild(c)) => c.name,
-                Some(c) => format!("ID:{}", c.id()),
-                None => "Not a channel".to_string(),
+            let channel_name = match message_channel {
+                Channel::Private(c) => format!("DM:{}", c.recipient.name),
+                Channel::Guild(c) => c.name,
+                _ => "Not a channel".to_string(),
             };
             match bot {
                 Bots::Autokommentator => {
@@ -134,7 +153,7 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
                         "Sent message \"{}\" to channel #{} ({})",
                         msg.content.replace("\n", "\\n"), channel_name, msg.channel_id
                     );
-                },
+                }
                 Bots::KaenguruKnecht => {
                     info!(target: "xd_bot::kaenguru",
                         "Sent message \"{}\" to channel #{} ({})",
@@ -142,14 +161,18 @@ pub async fn reply_to(ctx: &Context, new_message: &Message, bot: Bots) -> Result
                     );
                 }
             };
-        },
+        }
         Err(why) => {
             match bot {
-                Bots::Autokommentator => error!(target: "xd_bot::xd", "Error sending message: {:?}", why),
-                Bots::KaenguruKnecht => error!(target: "xd_bot::kaenguru", "Error sending message: {:?}", why),
+                Bots::Autokommentator => {
+                    error!(target: "xd_bot::xd", "Error sending message: {:?}", why)
+                }
+                Bots::KaenguruKnecht => {
+                    error!(target: "xd_bot::kaenguru", "Error sending message: {:?}", why)
+                }
             }
             return Err(ReplyError::Sending(why));
-        },
+        }
     };
 
     Ok(response)
