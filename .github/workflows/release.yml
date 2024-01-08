@@ -30,30 +30,39 @@ jobs:
         run: echo NAME=$(echo ${{ github.ref }} | cut -d / -f 3) >> ${{ GITHUB_OUTPUT }}
 
       - name: Setup cross compilation
-        run: cargo install cross
+        run: |
+          # Cargo configuration
+          mkdir -vp .cargo
+          cat > .cargo/config.toml << __EOF__
+          [target.aarch64-unknown-linux-gnu]
+          linker = "aarch64-linux-gnu-gcc"
+
+          [target.x86_64-pc-windows-gnu]
+          linker = "x86_64-w64-mingw32-gcc"
+          __EOF__
+          # Add rust targets
+          rustup target add aarch64-unknown-linux-gnu
+          rustup target add x86_64-pc-windows-gnu
+          # Install linkers
+          sudo apt-get install -y gcc gcc-aarch64-linux-gnu mingw-w64
 
       - name: Build cross platform
         run: |
           mkdir /tmp/release-files
-          ~/.cargo/bin/cross build --release --target aarch64-unknown-linux-gnu
+          cargo build --release --target aarch64-unknown-linux-gnu
           mv target/aarch64-unknown-linux-gnu/release/xd_bot ./aarch64-linux-discord_bots
-          ~/.cargo/bin/cross build --release --target x86_64-pc-windows-gnu
+          cargo build --release --target x86_64-pc-windows-gnu
           mv target/x86_64-pc-windows-gnu/release/xd_bot.exe ./win64-discord_bots.exe
-          ~/.cargo/bin/cross build --release --target x86_64-unknown-linux-gnu
-          mv target/x86_64-unknown-linux-gnu/release/xd_bot ./amd64-linux-discord_bots
+          cargo build --release
+          mv target/release/xd_bot ./amd64-linux-discord_bots
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - name: Create Release
+        uses: ncipollo/release-action@v1.13.0
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: ${{ steps.tag_name.outputs.NAME }}
-          prerelease: false
+          artifacts: LICENSE,aarch64-linux-discord_bots,win64-discord_bots.exe,amd64-linux-discord_bots
           draft: true
-          title: ${{ steps.tag_name.outputs.NAME }}
-          files: |
-            LICENSE
-            aarch64-linux-discord_bots
-            win64-discord_bots.exe
-            amd64-linux-discord_bots
+          tag: ${{ steps.tag_name.outputs.NAME }}
+          name: ${{ steps.tag_name.outputs.NAME }}
 
 # When the release has been created: create docker images in the same step to save computing time
       - name: Log into registry ${{ env.REGISTRY }}
