@@ -27,7 +27,7 @@ jobs:
 
       - name: Extract tag name
         id: tag_name
-        run: echo NAME=$(echo ${{ github.ref }} | cut -d / -f 3) >> ${{ GITHUB_OUTPUT }}
+        run: echo NAME=$(echo ${{ github.ref }} | cut -d / -f 3) >> "$GITHUB_OUTPUT"
 
       - name: Setup cross compilation
         run: |
