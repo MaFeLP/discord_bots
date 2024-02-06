@@ -57,7 +57,7 @@ jobs:
           mv target/release/xd_bot ./amd64-linux-discord_bots
 
       - name: Create Release
-        uses: ncipollo/release-action@v1.13.0
+        uses: ncipollo/release-action@v1.14.0
         with:
           artifacts: LICENSE,aarch64-linux-discord_bots,win64-discord_bots.exe,amd64-linux-discord_bots
           draft: true
