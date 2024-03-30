@@ -65,4 +65,10 @@ impl Trigger for CustomTrigger {
 
         Ok(roll)
     }
+
+    /// Since this is mostly a size-trigger, we use `false`, as this value is also used in
+    /// the size trigger.
+    fn is_pre_process(&self) -> bool {
+        false
+    }
 }
